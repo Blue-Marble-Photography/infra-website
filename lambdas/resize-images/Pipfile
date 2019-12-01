@@ -1,0 +1,20 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pytest = "*"
+pycodestyle = "*"
+bandit = "*"
+flake8 = "*"
+pylint = "*"
+autopep8 = "*"
+boto3 = "*"
+v = {editable = true,version = "*"}
+
+[packages]
+pillow = "*"
+
+[requires]
+python_version = "3.7"

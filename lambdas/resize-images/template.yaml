@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Resizes images, using preset image sizes, on demand
+
+Parameters:
+  ImagesBucket:
+    Type: String
+    Default: 'images.bluemarble.photography'
+  S3Region:
+    Type: String
+    Default: 'us-east-1'
+
+Globals:
+  Function:
+    Timeout: 10
+    MemorySize: 1024
+    Environment:
+      Variables:
+        IMAGES_BUCKET: !Ref ImagesBucket
+        S3_REGION: !Ref S3Region
+
+Resources:
+  ResizeImagesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ResizeImagesFunction
+      CodeUri: resize_images/
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Policies:
+        - Statement:
+              - Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                Effect: Allow
+                Resource: !Sub 'arn:aws:s3:::${ImagesBucket}/*'
+      Events:
+        ResizeImages:
+          Type: Api
+          Properties:
+            Path: /resize
+            Method: get
+            Auth:
+              Authorizer: null
+
+Outputs:
+  ResizeImagesApi:
+    Description: 'API Gateway endpoint URL for prod stage for Resize Images Function'
+    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/resize/'
+  ResizeImagesFunction:
+    Description: 'Resize Images Lambda Function ARN'
+    Value: !GetAtt ResizeImagesFunction.Arn
+  ResizeImagesFunctionIamRole:
+    Description: 'Implicit IAM Role created for Resize Images function'
+    Value: !GetAtt ResizeImagesFunctionRole.Arn
