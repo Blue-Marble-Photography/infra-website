@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Sends notification upon download of a photo
+
+Parameters:
+  SesArn:
+    Type: String
+    Default: 'arn:aws:ses:us-east-1:530167849052:identity/bluemarble.photography'
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  DownloadNotificationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: DownloadNotificationFunction
+      CodeUri: download_notification/
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Policies:
+        - Statement:
+                - Action:
+                    - ses:SendEmail
+                  Effect: Allow
+                  Resource: !Sub '${SesArn}'
+      Events:
+        DownloadNotification:
+          Type: Api
+          Properties:
+            Path: /notify
+            Method: get
+            Auth:
+              ApiKeyRequired: true
+
+Outputs:
+  DownloadNotificationApi:
+    Description: "API Gateway endpoint URL for Prod stage for Download Notification function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/notify/"
+  DownloadNotificationFunction:
+    Description: "Download Notification Lambda Function ARN"
+    Value: !GetAtt DownloadNotificationFunction.Arn
+  DownloadNotificationFunctionIamRole:
+    Description: "Implicit IAM Role created for Download Notification function"
+    Value: !GetAtt DownloadNotificationFunctionRole.Arn
