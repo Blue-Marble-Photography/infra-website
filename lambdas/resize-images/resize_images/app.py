@@ -9,7 +9,7 @@ from PIL import Image
 def lambda_handler(event, context):
   image = event['queryStringParameters']['path']
   file, extension = image.split('.')
-  master_filename, image_size = file.split('-')
+  master_filename, image_size = file.rsplit('-', 1)
   master_filename += '.jpg'
 
   allowed_sizes = ['2880', '2800', '1600', '1440', '1100', '750', '400']
