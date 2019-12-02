@@ -49,7 +49,7 @@ def resize_image(image_size, master_filename, image_format, requested_filename):
 
   buffer.seek(0)
 
-  upload_s3(buffer, image_format, requested_filename, s3)
+  upload_s3(buffer, image_format, requested_filename, master_filename, s3)
 
 
 def download_s3(master_image, s3):
@@ -63,14 +63,15 @@ def download_s3(master_image, s3):
   return obj_body
 
 
-def upload_s3(buffer, image_format, resized_image, s3):
+def upload_s3(buffer, image_format, resized_image, master_image, s3):
   s3_object = s3.Object(
       bucket_name=os.environ["IMAGES_BUCKET"],
       key=resized_image
   )
 
   if image_format == 'jpg':
-    s3_object.put(Body=buffer, ContentType='image/jpeg', CacheControl='max-age=31536000')
+    s3_object.put(Body=buffer, ContentType='image/jpeg', CacheControl='max-age=31536000',
+                  ContentDisposition='attachment;filename="' + master_image + '"')
   elif image_format == 'webp':
     s3_object.put(Body=buffer, ContentType='image/webp', CacheControl='max-age=31536000')
 
