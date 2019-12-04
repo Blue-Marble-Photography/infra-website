@@ -10,6 +10,11 @@ Parameters:
 Globals:
   Function:
     Timeout: 3
+  Api:
+    Cors:
+      AllowMethods: "'OPTIONS,GET'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      AllowOrigin: "'https://bluemarble.photography'"
 
 Resources:
   DownloadNotificationFunction:
