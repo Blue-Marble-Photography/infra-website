@@ -31,7 +31,7 @@ def lambda_handler(event, context):
     resize_image(image_size, master_filename, extension, image)
     url = create_url(image)
 
-    logger.info(f'URL: {url}')
+    logger.info(f'Redirect URL: {url}')
 
     return {
         'statusCode': 301,
