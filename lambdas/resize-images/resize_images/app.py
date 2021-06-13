@@ -13,11 +13,11 @@ logger.setLevel(logging.INFO)
 def lambda_handler(event, context):
     image = event['queryStringParameters']['path']
     file, extension = image.split('.')
-    master_filename, image_size = file.rsplit('-', 1)
-    master_filename += '.jpg'
+    original_filename, image_size = file.rsplit('-', 1)
+    original_filename += '.jpg'
 
     logger.info(f'Image: {image}')
-    logger.info(f'Master Filename: {master_filename}')
+    logger.info(f'Original Filename: {original_filename}')
 
     allowed_sizes = ['2880', '2800', '1600', '1440', '1100', '750', '400']
     allowed_extensions = ['webp', 'jpg']
@@ -28,7 +28,7 @@ def lambda_handler(event, context):
             'body': 'Invalid size or extension requested'
         }
 
-    resize_image(image_size, master_filename, extension, image)
+    resize_image(image_size, original_filename, extension, image)
     url = create_url(image)
 
     logger.info(f'Redirect URL: {url}')
@@ -42,11 +42,11 @@ def lambda_handler(event, context):
     }
 
 
-def resize_image(image_size, master_filename, image_format, requested_filename):
+def resize_image(image_size, original_filename, image_format, requested_filename):
     s3 = boto3.resource('s3')
-    master_file = download_s3(master_filename, s3)
+    original_file = download_s3(original_filename, s3)
 
-    img = Image.open(BytesIO(master_file))
+    img = Image.open(BytesIO(original_file))
     img = img.copy()
     img.thumbnail((int(image_size), int(image_size)), resample=PIL.Image.LANCZOS)
     buffer = BytesIO()
@@ -58,13 +58,13 @@ def resize_image(image_size, master_filename, image_format, requested_filename):
 
     buffer.seek(0)
 
-    upload_s3(buffer, image_format, requested_filename, master_filename, s3)
+    upload_s3(buffer, image_format, requested_filename, original_filename, s3)
 
 
-def download_s3(master_image, s3):
+def download_s3(original_image, s3):
     s3_object = s3.Object(
         bucket_name=os.environ["IMAGES_BUCKET"],
-        key='masters/' + master_image
+        key='originals/' + original_image
     )
 
     logger.info(f'S3 Get: {s3_object}')
@@ -74,7 +74,7 @@ def download_s3(master_image, s3):
     return obj_body
 
 
-def upload_s3(buffer, image_format, resized_image, master_image, s3):
+def upload_s3(buffer, image_format, resized_image, original_image, s3):
     s3_object = s3.Object(
         bucket_name=os.environ["IMAGES_BUCKET"],
         key=resized_image
@@ -82,7 +82,7 @@ def upload_s3(buffer, image_format, resized_image, master_image, s3):
 
     if image_format == 'jpg':
         response = s3_object.put(Body=buffer, ContentType='image/jpeg', CacheControl='max-age=31536000',
-                                 ContentDisposition='attachment;filename="' + master_image + '"')
+                                 ContentDisposition='attachment;filename="' + original_image + '"')
     elif image_format == 'webp':
         response = s3_object.put(Body=buffer, ContentType='image/webp', CacheControl='max-age=31536000')
 
