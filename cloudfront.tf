@@ -78,14 +78,32 @@ resource "aws_cloudfront_distribution" "images" {
   price_class         = "PriceClass_100"
 
   default_cache_behavior {
-    cache_policy_id        = data.aws_cloudfront_cache_policy.cache_policy.id
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
     target_origin_id       = "S3-images.${var.domain}"
     viewer_protocol_policy = "redirect-to-https"
     compress               = true
-  }
+    min_ttl                = 0
+    default_ttl            = 0
+    max_ttl                = 31536000
 
+    forwarded_values {
+      headers                 = []
+      query_string            = false
+      query_string_cache_keys = []
+
+      cookies {
+        forward           = "none"
+        whitelisted_names = []
+      }
+    }
+
+    lambda_function_association {
+      event_type   = "origin-response"
+      include_body = false
+      lambda_arn   = aws_lambda_function.cloudfront_404_redirect.qualified_arn
+    }
+  }
   restrictions {
     geo_restriction {
       restriction_type = "none"

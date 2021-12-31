@@ -16,7 +16,7 @@ resource "aws_s3_bucket" "main" {
 
 resource "aws_s3_bucket" "images" {
   bucket = "images.${var.domain}"
-  acl    = "private"
+  acl    = "public-read"
   policy = templatefile("templates/s3-cf-oai-policy.json", {
     oai_arn = "${aws_cloudfront_origin_access_identity.oai.iam_arn}"
     bucket  = "images.${var.domain}"

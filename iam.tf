@@ -16,3 +16,13 @@ resource "aws_iam_role_policy_attachment" "lambda_ses_forwarder_ses_full_access"
   role       = aws_iam_role.lambda_ses_forwarder.name
   policy_arn = data.aws_iam_policy.AmazonSESFullAccess.arn
 }
+
+resource "aws_iam_role" "lambda_at_edge" {
+  name               = "${var.domain}-lambda-edge"
+  assume_role_policy = file("templates/iam-lambda-edge-trust.json")
+
+  inline_policy {
+    name   = "${var.domain}-logs"
+    policy = file("templates/iam-logs-policy.json")
+  }
+}
