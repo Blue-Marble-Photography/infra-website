@@ -10,7 +10,7 @@ resource "aws_cloudfront_origin_access_identity" "oai" {
   comment = "access-identity-${var.domain}"
 }
 
-resource "aws_cloudfront_distribution" "main" {
+resource "aws_cloudfront_distribution" "main" { # tfsec:ignore:aws-cloudfront-enable-waf
   origin {
     domain_name         = aws_s3_bucket.main.bucket_regional_domain_name
     origin_id           = "S3-${var.domain}"
@@ -60,7 +60,7 @@ resource "aws_cloudfront_distribution" "main" {
   }
 }
 
-resource "aws_cloudfront_distribution" "images" {
+resource "aws_cloudfront_distribution" "images" { # tfsec:ignore:aws-cloudfront-enable-waf
   origin {
     domain_name         = aws_s3_bucket.images.bucket_regional_domain_name
     origin_id           = "S3-images.${var.domain}"
