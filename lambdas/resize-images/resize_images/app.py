@@ -3,7 +3,6 @@ import os
 from io import BytesIO
 
 import boto3
-import PIL
 from PIL import Image
 
 logger = logging.getLogger()
@@ -48,7 +47,7 @@ def resize_image(image_size, original_filename, image_format, requested_filename
 
     img = Image.open(BytesIO(original_file))
     img = img.copy()
-    img.thumbnail((int(image_size), int(image_size)), resample=PIL.Image.LANCZOS)
+    img.thumbnail((int(image_size), int(image_size)), resample=Image.Resampling.LANCZOS)
     buffer = BytesIO()
 
     if image_format == 'jpg':
