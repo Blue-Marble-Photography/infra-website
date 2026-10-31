@@ -10,8 +10,7 @@ resource "aws_s3_bucket_acl" "main" {
 
 resource "aws_s3_bucket_policy" "main" {
   bucket = aws_s3_bucket.main.id
-  policy = templatefile("templates/s3-cf-oai-policy.json", {
-    oai_arn             = aws_cloudfront_origin_access_identity.oai.iam_arn
+  policy = templatefile("templates/s3-cloudfront-policy.json", {
     bucket              = var.domain
     distribution_arn    = aws_cloudfront_distribution.main.arn
     delegate_account_id = ""
@@ -49,8 +48,7 @@ resource "aws_s3_bucket_acl" "images" {
 
 resource "aws_s3_bucket_policy" "images" {
   bucket = aws_s3_bucket.images.id
-  policy = templatefile("templates/s3-cf-oai-policy.json", {
-    oai_arn             = aws_cloudfront_origin_access_identity.oai.iam_arn
+  policy = templatefile("templates/s3-cloudfront-policy.json", {
     bucket              = "images.${var.domain}"
     distribution_arn    = aws_cloudfront_distribution.images.arn
     delegate_account_id = var.site_account_id

@@ -11,10 +11,6 @@ data "aws_cloudfront_response_headers_policy" "security_headers" {
   name = "Managed-SecurityHeadersPolicy"
 }
 
-resource "aws_cloudfront_origin_access_identity" "oai" {
-  comment = "access-identity-${var.domain}"
-}
-
 resource "aws_cloudfront_origin_access_control" "s3" {
   name                              = "s3-${var.domain}"
   description                       = "S3 origins for ${var.domain}"
@@ -52,14 +48,11 @@ resource "aws_cloudfront_cache_policy" "images" {
 
 resource "aws_cloudfront_distribution" "main" { # tfsec:ignore:aws-cloudfront-enable-waf
   origin {
-    domain_name         = aws_s3_bucket.main.bucket_domain_name
-    origin_id           = "S3-${var.domain}"
-    connection_attempts = 3
-    connection_timeout  = 10
-
-    s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.oai.cloudfront_access_identity_path
-    }
+    domain_name              = aws_s3_bucket.main.bucket_regional_domain_name
+    origin_access_control_id = aws_cloudfront_origin_access_control.s3.id
+    origin_id                = "S3-${var.domain}"
+    connection_attempts      = 3
+    connection_timeout       = 10
   }
   enabled             = true
   is_ipv6_enabled     = true
@@ -103,14 +96,11 @@ resource "aws_cloudfront_distribution" "main" { # tfsec:ignore:aws-cloudfront-en
 
 resource "aws_cloudfront_distribution" "images" { # tfsec:ignore:aws-cloudfront-enable-waf
   origin {
-    domain_name         = aws_s3_bucket.images.bucket_domain_name
-    origin_id           = "S3-images.${var.domain}"
-    connection_attempts = 3
-    connection_timeout  = 10
-
-    s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.oai.cloudfront_access_identity_path
-    }
+    domain_name              = aws_s3_bucket.images.bucket_regional_domain_name
+    origin_access_control_id = aws_cloudfront_origin_access_control.s3.id
+    origin_id                = "S3-images.${var.domain}"
+    connection_attempts      = 3
+    connection_timeout       = 10
   }
   enabled             = true
   is_ipv6_enabled     = true
