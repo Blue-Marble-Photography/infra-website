@@ -2,8 +2,9 @@ resource "aws_s3_bucket" "main" {
   bucket = var.domain
   acl    = "private"
   policy = templatefile("templates/s3-cf-oai-policy.json", {
-    oai_arn = "${aws_cloudfront_origin_access_identity.oai.iam_arn}"
-    bucket  = "${var.domain}"
+    oai_arn             = "${aws_cloudfront_origin_access_identity.oai.iam_arn}"
+    bucket              = "${var.domain}"
+    delegate_account_id = ""
     }
   )
   force_destroy = false
@@ -26,8 +27,9 @@ resource "aws_s3_bucket" "images" {
   bucket = "images.${var.domain}"
   acl    = "public-read"
   policy = templatefile("templates/s3-cf-oai-policy.json", {
-    oai_arn = "${aws_cloudfront_origin_access_identity.oai.iam_arn}"
-    bucket  = "images.${var.domain}"
+    oai_arn             = "${aws_cloudfront_origin_access_identity.oai.iam_arn}"
+    bucket              = "images.${var.domain}"
+    delegate_account_id = var.site_account_id
     }
   )
   force_destroy = false

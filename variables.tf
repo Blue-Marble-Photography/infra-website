@@ -10,6 +10,12 @@ variable "aws_profile" {
   default     = "josephgruber"
 }
 
+variable "site_account_id" {
+  description = "Sub-account granted read access to the images bucket for the planned account migration"
+  type        = string
+  default     = "508360653481"
+}
+
 variable "tags" {
   type = map(string)
   default = {
