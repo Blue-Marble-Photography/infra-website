@@ -26,7 +26,9 @@ Resources:
             FunctionName: ResizeImagesFunction
             CodeUri: resize_images/
             Handler: app.lambda_handler
-            Runtime: python3.8
+            Runtime: python3.14
+            Architectures:
+                - arm64
             Policies:
                 - Statement:
                       - Action:
