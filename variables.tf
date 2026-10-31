@@ -17,7 +17,8 @@ variable "site_account_id" {
 }
 
 variable "tags" {
-  type = map(string)
+  description = "Default tags applied to every resource"
+  type        = map(string)
   default = {
     Project = "bluemarble.photography"
   }
@@ -31,7 +32,7 @@ variable "domain" {
 
 variable "domain_aliases" {
   description = "Website domain aliases"
-  type        = list(any)
+  type        = list(string)
   default     = ["api.bluemarble.photography", "images.bluemarble.photography"]
 }
 
@@ -43,7 +44,7 @@ variable "mx_records" {
 
 variable "site_verification" {
   description = "Site verification records"
-  type        = list(any)
+  type        = list(string)
   default = [
     "google-site-verification=iw4ChOj0kx3skuukypp2k8u9-orl5uXGS7_gHY2-aFA",
     "facebook-domain-verification=f83a6ftg8de0aj79jkvxhv8rcplvy7"

@@ -1,28 +1,3 @@
-terraform {
-  backend "http" {
-  }
-
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 6.0"
-    }
-    archive = {
-      source  = "hashicorp/archive"
-      version = "~> 2.8"
-    }
-  }
-
-  required_version = ">= 1.6.0"
-}
-
-provider "aws" {
-  profile = var.aws_profile
-  region  = var.aws_region
-
-  default_tags {
-    tags = var.tags
-  }
-}
+# Resources are grouped by service: acm.tf, cloudfront.tf, dns.tf, iam.tf, lambda.tf, s3.tf, ses.tf.
 
 data "aws_caller_identity" "account" {}
