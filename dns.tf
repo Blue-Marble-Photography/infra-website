@@ -41,6 +41,18 @@ resource "aws_route53_record" "root" {
   }
 }
 
+resource "aws_route53_record" "root_ipv6" {
+  zone_id = aws_route53_zone.zone.zone_id
+  name    = var.domain
+  type    = "AAAA"
+
+  alias {
+    name                   = aws_cloudfront_distribution.main.domain_name
+    zone_id                = aws_cloudfront_distribution.main.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
 resource "aws_route53_record" "mx" {
   zone_id = aws_route53_zone.zone.zone_id
   name    = var.domain
@@ -61,6 +73,18 @@ resource "aws_route53_record" "images" {
   zone_id = aws_route53_zone.zone.zone_id
   name    = "images.${var.domain}"
   type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.images.domain_name
+    zone_id                = aws_cloudfront_distribution.images.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "images_ipv6" {
+  zone_id = aws_route53_zone.zone.zone_id
+  name    = "images.${var.domain}"
+  type    = "AAAA"
 
   alias {
     name                   = aws_cloudfront_distribution.images.domain_name

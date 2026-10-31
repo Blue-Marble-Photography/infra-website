@@ -13,20 +13,18 @@ resource "aws_s3_bucket_policy" "main" {
   policy = templatefile("templates/s3-cf-oai-policy.json", {
     oai_arn             = aws_cloudfront_origin_access_identity.oai.iam_arn
     bucket              = var.domain
+    distribution_arn    = aws_cloudfront_distribution.main.arn
     delegate_account_id = ""
   })
 }
 
-resource "aws_s3_bucket_website_configuration" "main" {
+resource "aws_s3_bucket_public_access_block" "main" {
   bucket = aws_s3_bucket.main.id
 
-  index_document {
-    suffix = "index.html"
-  }
-
-  error_document {
-    key = "error.html"
-  }
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "main" {
@@ -54,34 +52,18 @@ resource "aws_s3_bucket_policy" "images" {
   policy = templatefile("templates/s3-cf-oai-policy.json", {
     oai_arn             = aws_cloudfront_origin_access_identity.oai.iam_arn
     bucket              = "images.${var.domain}"
+    distribution_arn    = aws_cloudfront_distribution.images.arn
     delegate_account_id = var.site_account_id
   })
 }
 
-resource "aws_s3_bucket_website_configuration" "images" {
+resource "aws_s3_bucket_public_access_block" "images" {
   bucket = aws_s3_bucket.images.id
 
-  index_document {
-    suffix = "index.html"
-  }
-
-  error_document {
-    key = "index.html"
-  }
-
-  routing_rule {
-    condition {
-      http_error_code_returned_equals = "404"
-      key_prefix_equals               = ""
-    }
-
-    redirect {
-      host_name               = "api.${var.domain}"
-      http_redirect_code      = "307"
-      protocol                = "https"
-      replace_key_prefix_with = "v1/resize?path="
-    }
-  }
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "images" {

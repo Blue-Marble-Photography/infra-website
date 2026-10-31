@@ -1,5 +1,5 @@
 {
-    "Version": "2008-10-17",
+    "Version": "2012-10-17",
     "Id": "PolicyForCloudFrontPrivateContent",
     "Statement": [
         {
@@ -17,6 +17,26 @@
             },
             "Action": "s3:ListBucket",
             "Resource": "arn:aws:s3:::${bucket}"
+        },
+        {
+            "Sid": "AllowCloudFrontOAC",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "cloudfront.amazonaws.com"
+            },
+            "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::${bucket}/*",
+                "arn:aws:s3:::${bucket}"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "AWS:SourceArn": "${distribution_arn}"
+                }
+            }
         }%{ if delegate_account_id != "" },
         {
             "Sid": "DelegateS3Access",

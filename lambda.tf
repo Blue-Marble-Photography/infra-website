@@ -38,7 +38,7 @@ resource "aws_lambda_function" "cloudfront_404_redirect" {
   filename         = data.archive_file.cloudfront_404_redirect_lambda_zip_file.output_path
   source_code_hash = data.archive_file.cloudfront_404_redirect_lambda_zip_file.output_base64sha256
 
-  runtime = "python3.9"
+  runtime = "python3.14"
   timeout = "10"
   publish = true
 }
