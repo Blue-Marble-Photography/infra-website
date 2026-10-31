@@ -12,6 +12,14 @@ resource "aws_s3_bucket" "main" {
     index_document = "index.html"
     error_document = "error.html"
   }
+
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
 }
 
 resource "aws_s3_bucket" "images" {
@@ -55,6 +63,14 @@ resource "aws_s3_bucket" "images" {
       storage_class = "INTELLIGENT_TIERING"
     }
   }
+
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
 }
 
 resource "aws_s3_bucket" "email" {
@@ -76,6 +92,14 @@ resource "aws_s3_bucket" "email" {
     expiration {
       days                         = 7
       expired_object_delete_marker = false
+    }
+  }
+
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
     }
   }
 }

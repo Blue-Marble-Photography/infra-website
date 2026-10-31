@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "aws_profile" {
   description = "AWS profile"
   type        = string
-  default     = "personal"
+  default     = "josephgruber"
 }
 
 variable "tags" {

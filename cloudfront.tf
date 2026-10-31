@@ -30,7 +30,7 @@ resource "aws_cloudfront_distribution" "main" { # tfsec:ignore:aws-cloudfront-en
   custom_error_response {
     error_caching_min_ttl = 300
     error_code            = 404
-    response_code         = 200
+    response_code         = 404
     response_page_path    = "/404.html"
   }
 
