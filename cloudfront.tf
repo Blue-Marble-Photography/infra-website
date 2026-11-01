@@ -94,6 +94,49 @@ resource "aws_cloudfront_distribution" "main" { # tfsec:ignore:aws-cloudfront-en
   }
 }
 
+# Originals are offered as downloads, but the attachment header was only set on some
+# uploads. Add it at the edge for every original, alongside the same security headers
+# as Managed-SecurityHeadersPolicy (a behavior takes only one response headers policy).
+resource "aws_cloudfront_response_headers_policy" "originals_download" {
+  name    = "originals-download-${replace(var.domain, ".", "-")}"
+  comment = "Managed security headers plus Content-Disposition: attachment"
+
+  custom_headers_config {
+    items {
+      header   = "Content-Disposition"
+      value    = "attachment"
+      override = true
+    }
+  }
+
+  security_headers_config {
+    content_type_options {
+      override = true
+    }
+
+    frame_options {
+      frame_option = "SAMEORIGIN"
+      override     = false
+    }
+
+    referrer_policy {
+      referrer_policy = "strict-origin-when-cross-origin"
+      override        = false
+    }
+
+    strict_transport_security {
+      access_control_max_age_sec = 31536000
+      override                   = false
+    }
+
+    xss_protection {
+      protection = true
+      mode_block = true
+      override   = false
+    }
+  }
+}
+
 resource "aws_cloudfront_distribution" "images" { # tfsec:ignore:aws-cloudfront-enable-waf
   origin {
     domain_name              = aws_s3_bucket.images.bucket_regional_domain_name
@@ -123,6 +166,19 @@ resource "aws_cloudfront_distribution" "images" { # tfsec:ignore:aws-cloudfront-
       lambda_arn   = aws_lambda_function.cloudfront_404_redirect.qualified_arn
     }
   }
+
+  # Full-resolution originals: always download. No resize redirect; originals have no sizes.
+  ordered_cache_behavior {
+    path_pattern               = "originals/*"
+    cache_policy_id            = aws_cloudfront_cache_policy.images.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.originals_download.id
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "S3-images.${var.domain}"
+    viewer_protocol_policy     = "redirect-to-https"
+    compress                   = true
+  }
+
   restrictions {
     geo_restriction {
       restriction_type = "none"
