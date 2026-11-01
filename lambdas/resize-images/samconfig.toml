@@ -8,4 +8,4 @@ s3_prefix = "resize-images-app"
 region = "us-east-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "ImagesBucket=\"images.bluemarble.photography\" S3Region=\"us-east-1\""
+parameter_overrides = "ImagesBucket=\"bluemarble-images-508360653481\" S3Region=\"us-east-1\""

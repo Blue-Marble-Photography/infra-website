@@ -5,7 +5,7 @@ Description: Resizes images, using preset image sizes, on demand
 Parameters:
     ImagesBucket:
         Type: String
-        Default: "images.bluemarble.photography"
+        Default: "bluemarble-images-508360653481"
     S3Region:
         Type: String
         Default: "us-east-1"

@@ -32,8 +32,3 @@ output "images_site_bucket_name" {
   description = "Images bucket in the site account (508360653481), replacing images_bucket_name"
   value       = aws_s3_bucket.images_site.id
 }
-
-output "images_oac_test_domain" {
-  description = "Temporary test distribution domain for the cross-account OAC check"
-  value       = aws_cloudfront_distribution.images_oac_test.domain_name
-}

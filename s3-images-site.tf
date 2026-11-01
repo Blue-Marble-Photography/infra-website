@@ -1,12 +1,13 @@
-# Images bucket in the site's own account (508360653481), replacing images.bluemarble.photography.
-# Plan: ../../.claude/plans/images-bucket-move.md. Viewers only reach it through the images
-# distribution (OAC), so the name doesn't follow the hostname.
+# Images bucket in the site's own account (508360653481): the images distribution's origin and the
+# resize Lambda's bucket (cross-account from 530167849052). Viewers only reach it through the images
+# distribution (OAC), so the name doesn't follow the hostname. The old images.bluemarble.photography
+# bucket (s3.tf) is kept as a rollback.
 
 locals {
   images_site_bucket = "bluemarble-images-${var.site_account_id}"
 }
 
-#trivy:ignore:AVD-AWS-0090 # Versioning not required; the old bucket is the rollback during the move
+#trivy:ignore:AVD-AWS-0090 # Versioning not required
 resource "aws_s3_bucket" "images_site" {
   provider      = aws.site
   bucket        = local.images_site_bucket
@@ -77,7 +78,7 @@ data "aws_iam_policy_document" "images_site" {
     condition {
       test     = "StringEquals"
       variable = "AWS:SourceArn"
-      values   = [aws_cloudfront_distribution.images.arn, aws_cloudfront_distribution.images_oac_test.arn]
+      values   = [aws_cloudfront_distribution.images.arn]
     }
   }
 
@@ -125,44 +126,4 @@ resource "aws_s3_object" "images_site_tdmrep" {
   content       = file("templates/tdmrep.json")
   content_type  = "application/json"
   cache_control = "max-age=86400"
-}
-
-# Temporary: proves a distribution in 530167849052 can read this bucket through OAC before the
-# images distribution depends on it. Remove after the check (plan, prep step 6).
-data "aws_cloudfront_cache_policy" "caching_disabled" {
-  name = "Managed-CachingDisabled"
-}
-
-#trivy:ignore:AVD-AWS-0010 # Temporary test distribution
-#trivy:ignore:AVD-AWS-0011 # Temporary test distribution
-#trivy:ignore:AVD-AWS-0013 # Default *.cloudfront.net certificate; temporary test distribution
-resource "aws_cloudfront_distribution" "images_oac_test" {
-  comment         = "Temporary OAC check for ${local.images_site_bucket}"
-  enabled         = true
-  is_ipv6_enabled = true
-  price_class     = "PriceClass_100"
-
-  origin {
-    domain_name              = aws_s3_bucket.images_site.bucket_regional_domain_name
-    origin_access_control_id = aws_cloudfront_origin_access_control.s3.id
-    origin_id                = "S3-${local.images_site_bucket}"
-  }
-
-  default_cache_behavior {
-    cache_policy_id        = data.aws_cloudfront_cache_policy.caching_disabled.id
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = "S3-${local.images_site_bucket}"
-    viewer_protocol_policy = "redirect-to-https"
-  }
-
-  restrictions {
-    geo_restriction {
-      restriction_type = "none"
-    }
-  }
-
-  viewer_certificate {
-    cloudfront_default_certificate = true
-  }
 }

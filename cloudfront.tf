@@ -250,7 +250,7 @@ resource "aws_cloudfront_response_headers_policy" "originals_download" {
 #trivy:ignore:AVD-AWS-0011 # No WAF required
 resource "aws_cloudfront_distribution" "images" {
   origin {
-    domain_name              = aws_s3_bucket.images.bucket_regional_domain_name
+    domain_name              = aws_s3_bucket.images_site.bucket_regional_domain_name
     origin_access_control_id = aws_cloudfront_origin_access_control.s3.id
     origin_id                = "S3-images.${var.domain}"
     connection_attempts      = 3
