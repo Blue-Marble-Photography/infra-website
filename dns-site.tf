@@ -128,8 +128,3 @@ resource "aws_route53_record" "site_acm_cert_validation" {
   ttl             = 60
   type            = each.value.type
 }
-
-output "site_zone_name_servers" {
-  description = "Name servers of the site-account hosted zone"
-  value       = aws_route53_zone.site.name_servers
-}

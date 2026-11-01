@@ -32,3 +32,8 @@ output "images_site_bucket_name" {
   description = "Images bucket in the site account (508360653481), replacing images_bucket_name"
   value       = aws_s3_bucket.images_site.id
 }
+
+output "site_zone_name_servers" {
+  description = "Name servers of the site-account hosted zone"
+  value       = aws_route53_zone.site.name_servers
+}
