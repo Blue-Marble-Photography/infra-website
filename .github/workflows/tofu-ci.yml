@@ -21,7 +21,7 @@ jobs:
               uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
             - name: Setup OpenTofu
-              uses: opentofu/setup-opentofu@fc711fa910b93cba0f3fbecaafc9f42fd0c411cb # v2.0.0
+              uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
               with:
                   tofu_version: ${{ env.TOFU_VERSION }}
                   tofu_wrapper: false
@@ -46,7 +46,7 @@ jobs:
                     "ssh://git@github.com/"
 
             - name: Configure AWS credentials
-              uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
+              uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
               with:
                   role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
                   aws-region: us-east-1
@@ -61,7 +61,7 @@ jobs:
               run: tofu validate
 
             - name: Setup TFLint
-              uses: terraform-linters/setup-tflint@b480b8fcdaa6f2c577f8e4fa799e89e756bb7c93 # v6.2.2
+              uses: terraform-linters/setup-tflint@6ffdbaa3be476b3431f7275c26966ef32ff60337 # v6.3.2
 
             - name: TFLint Init
               run: tflint --init --config=.tflint.hcl
@@ -88,7 +88,7 @@ jobs:
               uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
             - name: Setup OpenTofu
-              uses: opentofu/setup-opentofu@fc711fa910b93cba0f3fbecaafc9f42fd0c411cb # v2.0.0
+              uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
               with:
                   tofu_version: ${{ env.TOFU_VERSION }}
                   tofu_wrapper: false
@@ -113,7 +113,7 @@ jobs:
                     "ssh://git@github.com/"
 
             - name: Configure AWS credentials
-              uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
+              uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
               with:
                   role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
                   aws-region: us-east-1
@@ -125,7 +125,7 @@ jobs:
               run: tofu plan -out=tfplan
 
             - name: Upload Plan
-              uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+              uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
               with:
                   name: tfplan
                   path: tfplan
