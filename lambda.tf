@@ -1,25 +1,3 @@
-data "archive_file" "ses_forwarder_lambda_zip_file" {
-  type        = "zip"
-  output_path = "${path.module}/build/lambda-ses-forwarder-${var.domain}.zip"
-
-  source {
-    content  = file("lambdas/ses-forwarder/index.mjs")
-    filename = "index.mjs"
-  }
-}
-
-resource "aws_lambda_function" "ses_forwarder" {
-  function_name = "sesForwarderBlueMarblePhotography"
-  role          = aws_iam_role.lambda_ses_forwarder.arn
-  handler       = "index.handler"
-
-  filename         = data.archive_file.ses_forwarder_lambda_zip_file.output_path
-  source_code_hash = data.archive_file.ses_forwarder_lambda_zip_file.output_base64sha256
-
-  runtime = "nodejs24.x"
-  timeout = "10"
-}
-
 data "archive_file" "cloudfront_404_redirect_lambda_zip_file" {
   type        = "zip"
   output_path = "/tmp/lambda-404-redirect-${var.domain}.zip"
