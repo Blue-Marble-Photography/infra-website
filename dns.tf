@@ -58,7 +58,24 @@ resource "aws_route53_record" "mx" {
   name    = var.domain
   type    = "MX"
   ttl     = "300"
-  records = [var.mx_records]
+  records = var.mx_records
+}
+
+resource "aws_route53_record" "proton_dkim" {
+  for_each = var.proton_dkim
+  zone_id  = aws_route53_zone.zone.zone_id
+  name     = "${each.key}._domainkey.${var.domain}"
+  type     = "CNAME"
+  ttl      = "300"
+  records  = [each.value]
+}
+
+resource "aws_route53_record" "dmarc" {
+  zone_id = aws_route53_zone.zone.zone_id
+  name    = "_dmarc.${var.domain}"
+  type    = "TXT"
+  ttl     = "300"
+  records = ["v=DMARC1; p=quarantine"]
 }
 
 resource "aws_route53_record" "txt" {

@@ -37,19 +37,30 @@ variable "domain_aliases" {
 }
 
 variable "mx_records" {
-  description = "MX DNS records"
-  type        = string
-  default     = "10 inbound-smtp.us-east-1.amazonaws.com"
+  description = "MX DNS records (Proton Mail)"
+  type        = list(string)
+  default     = ["10 mail.protonmail.ch", "20 mailsec.protonmail.ch"]
 }
 
 variable "site_verification" {
-  description = "Site verification records"
+  description = "Apex TXT records: site verifications and SPF"
   type        = list(string)
   default = [
     "google-site-verification=iw4ChOj0kx3skuukypp2k8u9-orl5uXGS7_gHY2-aFA",
     "facebook-domain-verification=f83a6ftg8de0aj79jkvxhv8rcplvy7",
-    "protonmail-verification=b58d71fb285e75888a242966d213c442c8f96572"
+    "protonmail-verification=b58d71fb285e75888a242966d213c442c8f96572",
+    "v=spf1 include:_spf.protonmail.ch ~all"
   ]
+}
+
+variable "proton_dkim" {
+  description = "Proton Mail DKIM CNAMEs: selector => target"
+  type        = map(string)
+  default = {
+    protonmail  = "protonmail.domainkey.dsnmqp5ebgvgs3c5qn7fuswt4eprnwv3qldi3tlwgjmpwmg4wbria.domains.proton.ch."
+    protonmail2 = "protonmail2.domainkey.dsnmqp5ebgvgs3c5qn7fuswt4eprnwv3qldi3tlwgjmpwmg4wbria.domains.proton.ch."
+    protonmail3 = "protonmail3.domainkey.dsnmqp5ebgvgs3c5qn7fuswt4eprnwv3qldi3tlwgjmpwmg4wbria.domains.proton.ch."
+  }
 }
 
 variable "state_account_id" {
