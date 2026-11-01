@@ -51,24 +51,6 @@ variable "site_verification" {
   ]
 }
 
-variable "gitlab_project_path" {
-  description = "GitLab project allowed to assume the CI role (OIDC sub claim)"
-  type        = string
-  default     = "joseph.gruber/bluemarble.photography"
-}
-
-variable "resize_stack_name" {
-  description = "CloudFormation stack of the resize Lambda (lambdas/resize-images/samconfig.toml)"
-  type        = string
-  default     = "resize-images-app"
-}
-
-variable "sam_artifacts_bucket" {
-  description = "SAM-managed bucket holding resize Lambda deploy artifacts (samconfig.toml s3_bucket)"
-  type        = string
-  default     = "aws-sam-cli-managed-default-samclisourcebucket-jgpso52uwphy"
-}
-
 variable "state_account_id" {
   description = "Site's own account: holds the OpenTofu state and the GitHub Actions roles (infra-aws-base)"
   type        = string
