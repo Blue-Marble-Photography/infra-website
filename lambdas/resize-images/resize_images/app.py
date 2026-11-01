@@ -47,23 +47,14 @@ def lambda_handler(event, context):
     allowed_extensions = ['webp', 'jpg']
 
     if image_size not in allowed_sizes or extension not in allowed_extensions:
-        return {
-            'statusCode': 400,
-            'body': 'Invalid size or extension requested'
-        }
+        return {'statusCode': 400, 'body': 'Invalid size or extension requested'}
 
     resize_image(image_size, original_filename, extension, image)
     url = create_url(image)
 
     logger.info(f'Redirect URL: {url}')
 
-    return {
-        'statusCode': 301,
-        'headers': {
-            'location': url
-        },
-        'body': ''
-    }
+    return {'statusCode': 301, 'headers': {'location': url}, 'body': ''}
 
 
 def resize_image(image_size, original_filename, image_format, requested_filename):
@@ -133,10 +124,7 @@ def build_metadata(original: Image.Image) -> tuple[bytes, bytes]:
 
 
 def download_s3(original_image, s3):
-    s3_object = s3.Object(
-        bucket_name=os.environ["IMAGES_BUCKET"],
-        key='originals/' + original_image
-    )
+    s3_object = s3.Object(bucket_name=os.environ['IMAGES_BUCKET'], key='originals/' + original_image)
 
     logger.info(f'S3 Get: {s3_object}')
 
@@ -146,14 +134,15 @@ def download_s3(original_image, s3):
 
 
 def upload_s3(buffer, image_format, resized_image, original_image, s3):
-    s3_object = s3.Object(
-        bucket_name=os.environ["IMAGES_BUCKET"],
-        key=resized_image
-    )
+    s3_object = s3.Object(bucket_name=os.environ['IMAGES_BUCKET'], key=resized_image)
 
     if image_format == 'jpg':
-        response = s3_object.put(Body=buffer, ContentType='image/jpeg', CacheControl='max-age=31536000',
-                                 ContentDisposition='attachment;filename="' + original_image + '"')
+        response = s3_object.put(
+            Body=buffer,
+            ContentType='image/jpeg',
+            CacheControl='max-age=31536000',
+            ContentDisposition='attachment;filename="' + original_image + '"',
+        )
     elif image_format == 'webp':
         response = s3_object.put(Body=buffer, ContentType='image/webp', CacheControl='max-age=31536000')
 

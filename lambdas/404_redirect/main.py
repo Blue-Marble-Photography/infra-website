@@ -1,5 +1,3 @@
-import json
-
 def lambda_handler(event, context):
     response = event['Records'][0]['cf']['response']
     request = event['Records'][0]['cf']['request']
