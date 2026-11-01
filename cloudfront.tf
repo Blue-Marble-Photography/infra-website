@@ -1,14 +1,49 @@
-data "aws_cloudfront_function" "default_root_object" {
-  name  = var.cloudfront_root_object_function
-  stage = "LIVE"
+locals {
+  # AI crawlers and AI search/assistant agents rejected at the edge (case-insensitive
+  # substring match). Narrower than robots.txt: nothing that powers link previews
+  # (facebookexternalhit) or ordinary search.
+  ai_agents = [
+    "GPTBot", "ChatGPT-User", "ChatGPT Agent", "OAI-SearchBot",
+    "ClaudeBot", "Claude-User", "Claude-SearchBot", "Claude-Web", "anthropic-ai",
+    "CCBot", "Bytespider", "PerplexityBot", "Perplexity-User",
+    "meta-externalagent", "meta-externalfetcher", "FacebookBot", "Amazonbot",
+    "cohere-ai", "cohere-training-data-crawler", "Diffbot", "ImagesiftBot", "img2dataset",
+    "LAIONDownloader", "laion-huggingface-processor", "Timpibot", "omgili", "Webzio-Extended",
+    "AI2Bot", "PanguBot", "DeepSeekBot", "MistralAI", "QwenBot", "TikTokSpider",
+    "DuckAssistBot", "CloudVertexBot", "GrokBot", "Kangaroo Bot", "YouBot", "iaskspider",
+    "Brightbot", "imageSpider", "FirecrawlAgent", "Crawl4AI", "ExaBot", "TavilyBot",
+    "KimiBot", "DoubaoBot", "ERNIEBot", "YiyanBot", "Manus-User", "Gemini-Deep-Research",
+    "GoogleAgent", "NovaAct", "bedrockbot", "AzureAI-SearchBot", "ChatGLM-Spider",
+    "Andibot", "PhindBot", "LinerBot", "ShapBot",
+  ]
+  # Names are letters, digits, hyphens, and spaces only, so no regex escaping is needed.
+  ai_agents_pattern = join("|", local.ai_agents)
+}
+
+resource "aws_cloudfront_function" "site_viewer_request" {
+  name    = "${replace(var.domain, ".", "-")}-site-viewer-request"
+  comment = "Reject AI crawlers; serve index.html for directory URLs"
+  runtime = "cloudfront-js-2.0"
+  publish = true
+  code = templatefile("functions/viewer-request.js", {
+    ai_agents_pattern = local.ai_agents_pattern
+    rewrite_index     = true
+  })
+}
+
+resource "aws_cloudfront_function" "images_viewer_request" {
+  name    = "${replace(var.domain, ".", "-")}-images-viewer-request"
+  comment = "Reject AI crawlers"
+  runtime = "cloudfront-js-2.0"
+  publish = true
+  code = templatefile("functions/viewer-request.js", {
+    ai_agents_pattern = local.ai_agents_pattern
+    rewrite_index     = false
+  })
 }
 
 data "aws_cloudfront_cache_policy" "cache_policy" {
   name = "Managed-CachingOptimized"
-}
-
-data "aws_cloudfront_response_headers_policy" "security_headers" {
-  name = "Managed-SecurityHeadersPolicy"
 }
 
 resource "aws_cloudfront_origin_access_control" "s3" {
@@ -69,7 +104,7 @@ resource "aws_cloudfront_distribution" "main" { # tfsec:ignore:aws-cloudfront-en
 
   default_cache_behavior {
     cache_policy_id            = data.aws_cloudfront_cache_policy.cache_policy.id
-    response_headers_policy_id = data.aws_cloudfront_response_headers_policy.security_headers.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
     allowed_methods            = ["GET", "HEAD"] # OPTIONS?
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "S3-${var.domain}"
@@ -78,7 +113,7 @@ resource "aws_cloudfront_distribution" "main" { # tfsec:ignore:aws-cloudfront-en
 
     function_association {
       event_type   = "viewer-request"
-      function_arn = data.aws_cloudfront_function.default_root_object.arn
+      function_arn = aws_cloudfront_function.site_viewer_request.arn
     }
   }
 
@@ -94,17 +129,77 @@ resource "aws_cloudfront_distribution" "main" { # tfsec:ignore:aws-cloudfront-en
   }
 }
 
+# Same security headers as Managed-SecurityHeadersPolicy, plus AI opt-out signals:
+# X-Robots-Tag noai/noimageai and the W3C TDMRep text-and-data-mining reservation.
+resource "aws_cloudfront_response_headers_policy" "site" {
+  name    = "site-${replace(var.domain, ".", "-")}"
+  comment = "Managed security headers plus AI training opt-out"
+
+  custom_headers_config {
+    items {
+      header   = "X-Robots-Tag"
+      value    = "noai, noimageai"
+      override = true
+    }
+
+    items {
+      header   = "tdm-reservation"
+      value    = "1"
+      override = true
+    }
+  }
+
+  security_headers_config {
+    content_type_options {
+      override = true
+    }
+
+    frame_options {
+      frame_option = "SAMEORIGIN"
+      override     = false
+    }
+
+    referrer_policy {
+      referrer_policy = "strict-origin-when-cross-origin"
+      override        = false
+    }
+
+    strict_transport_security {
+      access_control_max_age_sec = 31536000
+      override                   = false
+    }
+
+    xss_protection {
+      protection = true
+      mode_block = true
+      override   = false
+    }
+  }
+}
+
 # Originals are offered as downloads, but the attachment header was only set on some
 # uploads. Add it at the edge for every original, alongside the same security headers
 # as Managed-SecurityHeadersPolicy (a behavior takes only one response headers policy).
 resource "aws_cloudfront_response_headers_policy" "originals_download" {
   name    = "originals-download-${replace(var.domain, ".", "-")}"
-  comment = "Managed security headers plus Content-Disposition: attachment"
+  comment = "Managed security headers, AI opt-out, and Content-Disposition: attachment"
 
   custom_headers_config {
     items {
       header   = "Content-Disposition"
       value    = "attachment"
+      override = true
+    }
+
+    items {
+      header   = "X-Robots-Tag"
+      value    = "noai, noimageai"
+      override = true
+    }
+
+    items {
+      header   = "tdm-reservation"
+      value    = "1"
       override = true
     }
   }
@@ -153,12 +248,17 @@ resource "aws_cloudfront_distribution" "images" { # tfsec:ignore:aws-cloudfront-
 
   default_cache_behavior {
     cache_policy_id            = aws_cloudfront_cache_policy.images.id
-    response_headers_policy_id = data.aws_cloudfront_response_headers_policy.security_headers.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
     allowed_methods            = ["GET", "HEAD"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "S3-images.${var.domain}"
     viewer_protocol_policy     = "redirect-to-https"
     compress                   = true
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.images_viewer_request.arn
+    }
 
     lambda_function_association {
       event_type   = "origin-response"
@@ -177,6 +277,11 @@ resource "aws_cloudfront_distribution" "images" { # tfsec:ignore:aws-cloudfront-
     target_origin_id           = "S3-images.${var.domain}"
     viewer_protocol_policy     = "redirect-to-https"
     compress                   = true
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.images_viewer_request.arn
+    }
   }
 
   restrictions {

@@ -143,3 +143,13 @@ resource "aws_s3_bucket_public_access_block" "email" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
+# robots.txt for images.bluemarble.photography. Without it the request 404s into the
+# resize redirect. AI crawler list mirrors the site's robots.txt.
+resource "aws_s3_object" "images_robots" {
+  bucket        = aws_s3_bucket.images.id
+  key           = "robots.txt"
+  content       = file("templates/robots-images.txt")
+  content_type  = "text/plain"
+  cache_control = "max-age=86400"
+}

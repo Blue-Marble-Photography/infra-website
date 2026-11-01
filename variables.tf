@@ -50,9 +50,3 @@ variable "site_verification" {
     "facebook-domain-verification=f83a6ftg8de0aj79jkvxhv8rcplvy7"
   ]
 }
-
-variable "cloudfront_root_object_function" {
-  description = "CloudFront function for default root object"
-  type        = string
-  default     = "default-root-object"
-}
