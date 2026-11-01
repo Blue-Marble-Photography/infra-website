@@ -3,8 +3,8 @@ data "archive_file" "ses_forwarder_lambda_zip_file" {
   output_path = "/tmp/lambda-ses-forwarder-${var.domain}.zip"
 
   source {
-    content  = file("lambdas/ses-forwarder/index.js")
-    filename = "index.js"
+    content  = file("lambdas/ses-forwarder/index.mjs")
+    filename = "index.mjs"
   }
 }
 
@@ -16,8 +16,7 @@ resource "aws_lambda_function" "ses_forwarder" {
   filename         = data.archive_file.ses_forwarder_lambda_zip_file.output_path
   source_code_hash = data.archive_file.ses_forwarder_lambda_zip_file.output_base64sha256
 
-  # tflint-ignore: aws_lambda_function_deprecated_runtime # Frozen until the aws-sdk v3 / nodejs22.x port
-  runtime = "nodejs12.x"
+  runtime = "nodejs24.x"
   timeout = "10"
 }
 
