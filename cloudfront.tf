@@ -81,7 +81,9 @@ resource "aws_cloudfront_cache_policy" "images" {
   }
 }
 
-resource "aws_cloudfront_distribution" "main" { # tfsec:ignore:aws-cloudfront-enable-waf
+#trivy:ignore:AVD-AWS-0010 # No logging required
+#trivy:ignore:AVD-AWS-0011 # No WAF required
+resource "aws_cloudfront_distribution" "main" {
   origin {
     domain_name              = aws_s3_bucket.main.bucket_regional_domain_name
     origin_access_control_id = aws_cloudfront_origin_access_control.s3.id
@@ -232,7 +234,9 @@ resource "aws_cloudfront_response_headers_policy" "originals_download" {
   }
 }
 
-resource "aws_cloudfront_distribution" "images" { # tfsec:ignore:aws-cloudfront-enable-waf
+#trivy:ignore:AVD-AWS-0010 # No logging required
+#trivy:ignore:AVD-AWS-0011 # No WAF required
+resource "aws_cloudfront_distribution" "images" {
   origin {
     domain_name              = aws_s3_bucket.images.bucket_regional_domain_name
     origin_access_control_id = aws_cloudfront_origin_access_control.s3.id

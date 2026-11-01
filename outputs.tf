@@ -22,3 +22,13 @@ output "gitlab_ci_role_arn" {
   description = "IAM role GitLab CI assumes via OIDC (AWS_ROLE_ARN in .gitlab-ci.yml)"
   value       = aws_iam_role.gitlab_ci.arn
 }
+
+output "bluemarble_infra_role_arn" {
+  description = "Role the aws provider assumes from the state account"
+  value       = aws_iam_role.bluemarble_infra.arn
+}
+
+output "website_deploy_role_arn" {
+  description = "Role the website deploy workflow chains into"
+  value       = aws_iam_role.website_deploy.arn
+}

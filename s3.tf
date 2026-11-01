@@ -1,3 +1,5 @@
+#trivy:ignore:AVD-AWS-0090 # Versioning not required
+#trivy:ignore:AVD-AWS-0320 # Bucket names match the CloudFront/SES domain names
 resource "aws_s3_bucket" "main" {
   bucket        = var.domain
   force_destroy = false
@@ -26,6 +28,7 @@ resource "aws_s3_bucket_public_access_block" "main" {
   restrict_public_buckets = true
 }
 
+#trivy:ignore:AVD-AWS-0132 # AWS managed S3 key ok
 resource "aws_s3_bucket_server_side_encryption_configuration" "main" {
   bucket = aws_s3_bucket.main.id
 
@@ -36,6 +39,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "main" {
   }
 }
 
+#trivy:ignore:AVD-AWS-0090 # Versioning not required
+#trivy:ignore:AVD-AWS-0320 # Bucket names match the CloudFront/SES domain names
 resource "aws_s3_bucket" "images" {
   bucket        = "images.${var.domain}"
   force_destroy = false
@@ -79,6 +84,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "images" {
   }
 }
 
+#trivy:ignore:AVD-AWS-0132 # AWS managed S3 key ok
 resource "aws_s3_bucket_server_side_encryption_configuration" "images" {
   bucket = aws_s3_bucket.images.id
 
@@ -89,6 +95,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "images" {
   }
 }
 
+#trivy:ignore:AVD-AWS-0090 # Versioning not required
+#trivy:ignore:AVD-AWS-0320 # Bucket names match the CloudFront/SES domain names
 resource "aws_s3_bucket" "email" {
   bucket        = "${var.domain}-email"
   force_destroy = false
@@ -125,6 +133,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "email" {
   }
 }
 
+#trivy:ignore:AVD-AWS-0132 # AWS managed S3 key ok
 resource "aws_s3_bucket_server_side_encryption_configuration" "email" {
   bucket = aws_s3_bucket.email.id
 

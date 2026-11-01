@@ -4,10 +4,10 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
-variable "aws_profile" {
-  description = "AWS profile"
+variable "resources_account_id" {
+  description = "Account holding the site's resources until the account migration (provider assumes bluemarble-infra here)"
   type        = string
-  default     = "josephgruber"
+  default     = "530167849052"
 }
 
 variable "site_account_id" {
@@ -67,4 +67,10 @@ variable "sam_artifacts_bucket" {
   description = "SAM-managed bucket holding resize Lambda deploy artifacts (samconfig.toml s3_bucket)"
   type        = string
   default     = "aws-sam-cli-managed-default-samclisourcebucket-jgpso52uwphy"
+}
+
+variable "state_account_id" {
+  description = "Site's own account: holds the OpenTofu state and the GitHub Actions roles (infra-aws-base)"
+  type        = string
+  default     = "508360653481"
 }
