@@ -50,3 +50,21 @@ variable "site_verification" {
     "facebook-domain-verification=f83a6ftg8de0aj79jkvxhv8rcplvy7"
   ]
 }
+
+variable "gitlab_project_path" {
+  description = "GitLab project allowed to assume the CI role (OIDC sub claim)"
+  type        = string
+  default     = "joseph.gruber/bluemarble.photography"
+}
+
+variable "resize_stack_name" {
+  description = "CloudFormation stack of the resize Lambda (_components/aws-resize-images/samconfig.toml)"
+  type        = string
+  default     = "resize-images-app"
+}
+
+variable "sam_artifacts_bucket" {
+  description = "SAM-managed bucket holding resize Lambda deploy artifacts (samconfig.toml s3_bucket)"
+  type        = string
+  default     = "aws-sam-cli-managed-default-samclisourcebucket-jgpso52uwphy"
+}

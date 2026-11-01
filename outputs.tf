@@ -17,3 +17,8 @@ output "images_distribution_id" {
   description = "CloudFront distribution for images"
   value       = aws_cloudfront_distribution.images.id
 }
+
+output "gitlab_ci_role_arn" {
+  description = "IAM role GitLab CI assumes via OIDC (AWS_ROLE_ARN in .gitlab-ci.yml)"
+  value       = aws_iam_role.gitlab_ci.arn
+}
