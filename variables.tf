@@ -58,7 +58,7 @@ variable "gitlab_project_path" {
 }
 
 variable "resize_stack_name" {
-  description = "CloudFormation stack of the resize Lambda (_components/aws-resize-images/samconfig.toml)"
+  description = "CloudFormation stack of the resize Lambda (lambdas/resize-images/samconfig.toml)"
   type        = string
   default     = "resize-images-app"
 }

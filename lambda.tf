@@ -3,7 +3,7 @@ data "archive_file" "ses_forwarder_lambda_zip_file" {
   output_path = "/tmp/lambda-ses-forwarder-${var.domain}.zip"
 
   source {
-    content  = file("lambda_functions/ses-forwarder/index.js")
+    content  = file("lambdas/ses-forwarder/index.js")
     filename = "index.js"
   }
 }
@@ -25,7 +25,7 @@ data "archive_file" "cloudfront_404_redirect_lambda_zip_file" {
   output_path = "/tmp/lambda-404-redirect-${var.domain}.zip"
 
   source {
-    content  = file("lambda_functions/404_redirect/main.py")
+    content  = file("lambdas/404_redirect/main.py")
     filename = "main.py"
   }
 }
