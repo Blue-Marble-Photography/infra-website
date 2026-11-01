@@ -134,7 +134,8 @@ def download_s3(original_image, s3):
 
 
 def upload_s3(buffer, image_format, resized_image, original_image, s3):
-    s3_object = s3.Object(bucket_name=os.environ['IMAGES_BUCKET'], key=resized_image)
+    # Served from the root URL by the images distribution's origin_path (/generated).
+    s3_object = s3.Object(bucket_name=os.environ['IMAGES_BUCKET'], key='generated/' + resized_image)
 
     if image_format == 'jpg':
         response = s3_object.put(

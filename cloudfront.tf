@@ -249,10 +249,21 @@ resource "aws_cloudfront_response_headers_policy" "originals_download" {
 #trivy:ignore:AVD-AWS-0010 # No logging required
 #trivy:ignore:AVD-AWS-0011 # No WAF required
 resource "aws_cloudfront_distribution" "images" {
+  # Resized copies live under generated/ (written by the resize Lambda); viewer URLs stay at the root.
   origin {
     domain_name              = aws_s3_bucket.images_site.bucket_regional_domain_name
     origin_access_control_id = aws_cloudfront_origin_access_control.s3.id
     origin_id                = "S3-images.${var.domain}"
+    origin_path              = "/generated"
+    connection_attempts      = 3
+    connection_timeout       = 10
+  }
+
+  # Bucket root: originals/, robots.txt, .well-known/.
+  origin {
+    domain_name              = aws_s3_bucket.images_site.bucket_regional_domain_name
+    origin_access_control_id = aws_cloudfront_origin_access_control.s3.id
+    origin_id                = "S3-images-root.${var.domain}"
     connection_attempts      = 3
     connection_timeout       = 10
   }
@@ -290,7 +301,40 @@ resource "aws_cloudfront_distribution" "images" {
     response_headers_policy_id = aws_cloudfront_response_headers_policy.originals_download.id
     allowed_methods            = ["GET", "HEAD"]
     cached_methods             = ["GET", "HEAD"]
-    target_origin_id           = "S3-images.${var.domain}"
+    target_origin_id           = "S3-images-root.${var.domain}"
+    viewer_protocol_policy     = "redirect-to-https"
+    compress                   = true
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.images_viewer_request.arn
+    }
+  }
+
+  # Crawler and TDMRep opt-out files at the bucket root (tofu objects); a miss is a plain 404, not a resize.
+  ordered_cache_behavior {
+    path_pattern               = "robots.txt"
+    cache_policy_id            = aws_cloudfront_cache_policy.images.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "S3-images-root.${var.domain}"
+    viewer_protocol_policy     = "redirect-to-https"
+    compress                   = true
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.images_viewer_request.arn
+    }
+  }
+
+  ordered_cache_behavior {
+    path_pattern               = ".well-known/*"
+    cache_policy_id            = aws_cloudfront_cache_policy.images.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "S3-images-root.${var.domain}"
     viewer_protocol_policy     = "redirect-to-https"
     compress                   = true
 
