@@ -126,9 +126,12 @@ jobs:
 
             - name: Upload Plan
               uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+              # The Lambda zips go with the plan: the apply job reads them from the same paths.
               with:
                   name: tfplan
-                  path: tfplan
+                  path: |
+                      tfplan
+                      build/
                   retention-days: 7
 
     apply:

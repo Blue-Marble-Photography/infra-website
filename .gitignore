@@ -4,3 +4,4 @@
 *.tfplan
 crash.log
 .aws-sam/
+build/

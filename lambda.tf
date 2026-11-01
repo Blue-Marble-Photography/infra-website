@@ -1,6 +1,6 @@
 data "archive_file" "ses_forwarder_lambda_zip_file" {
   type        = "zip"
-  output_path = "/tmp/lambda-ses-forwarder-${var.domain}.zip"
+  output_path = "${path.module}/build/lambda-ses-forwarder-${var.domain}.zip"
 
   source {
     content  = file("lambdas/ses-forwarder/index.mjs")
