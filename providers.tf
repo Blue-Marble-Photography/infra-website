@@ -12,3 +12,14 @@ provider "aws" {
     tags = var.tags
   }
 }
+
+# The site's own account (508360653481): resources move here one at a time. No assume_role:
+# credentials already start in this account.
+provider "aws" {
+  alias  = "site"
+  region = var.aws_region
+
+  default_tags {
+    tags = var.tags
+  }
+}
