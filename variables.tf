@@ -47,7 +47,8 @@ variable "site_verification" {
   type        = list(string)
   default = [
     "google-site-verification=iw4ChOj0kx3skuukypp2k8u9-orl5uXGS7_gHY2-aFA",
-    "facebook-domain-verification=f83a6ftg8de0aj79jkvxhv8rcplvy7"
+    "facebook-domain-verification=f83a6ftg8de0aj79jkvxhv8rcplvy7",
+    "protonmail-verification=b58d71fb285e75888a242966d213c442c8f96572"
   ]
 }
 
