@@ -149,6 +149,12 @@ resource "aws_cloudfront_response_headers_policy" "site" {
       value    = "1"
       override = true
     }
+
+    items {
+      header   = "tdm-policy"
+      value    = "https://${var.domain}/license/"
+      override = true
+    }
   }
 
   security_headers_config {
@@ -202,6 +208,12 @@ resource "aws_cloudfront_response_headers_policy" "originals_download" {
     items {
       header   = "tdm-reservation"
       value    = "1"
+      override = true
+    }
+
+    items {
+      header   = "tdm-policy"
+      value    = "https://${var.domain}/license/"
       override = true
     }
   }

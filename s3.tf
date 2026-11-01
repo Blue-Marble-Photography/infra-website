@@ -162,3 +162,12 @@ resource "aws_s3_object" "images_robots" {
   content_type  = "text/plain"
   cache_control = "max-age=86400"
 }
+
+# TDMRep opt-out (W3C TDM Reservation Protocol); the site serves the same file from the website repo.
+resource "aws_s3_object" "images_tdmrep" {
+  bucket        = aws_s3_bucket.images.id
+  key           = ".well-known/tdmrep.json"
+  content       = file("templates/tdmrep.json")
+  content_type  = "application/json"
+  cache_control = "max-age=86400"
+}
