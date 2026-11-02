@@ -8,5 +8,5 @@ resource "aws_ssm_parameter" "website_bucket_name" {
 resource "aws_ssm_parameter" "website_distribution" {
   name  = "/website/cloudfront-distribution"
   type  = "String"
-  value = aws_cloudfront_distribution.main.id
+  value = module.cdn_legacy.main_distribution_id
 }

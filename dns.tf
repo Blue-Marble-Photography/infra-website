@@ -35,8 +35,8 @@ resource "aws_route53_record" "root" {
   type    = "A"
 
   alias {
-    name                   = aws_cloudfront_distribution.main.domain_name
-    zone_id                = aws_cloudfront_distribution.main.hosted_zone_id
+    name                   = module.cdn_legacy.main_distribution_domain_name
+    zone_id                = module.cdn_legacy.main_distribution_hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -47,8 +47,8 @@ resource "aws_route53_record" "root_ipv6" {
   type    = "AAAA"
 
   alias {
-    name                   = aws_cloudfront_distribution.main.domain_name
-    zone_id                = aws_cloudfront_distribution.main.hosted_zone_id
+    name                   = module.cdn_legacy.main_distribution_domain_name
+    zone_id                = module.cdn_legacy.main_distribution_hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -92,8 +92,8 @@ resource "aws_route53_record" "images" {
   type    = "A"
 
   alias {
-    name                   = aws_cloudfront_distribution.images.domain_name
-    zone_id                = aws_cloudfront_distribution.images.hosted_zone_id
+    name                   = module.cdn_legacy.images_distribution_domain_name
+    zone_id                = module.cdn_legacy.images_distribution_hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -104,8 +104,8 @@ resource "aws_route53_record" "images_ipv6" {
   type    = "AAAA"
 
   alias {
-    name                   = aws_cloudfront_distribution.images.domain_name
-    zone_id                = aws_cloudfront_distribution.images.hosted_zone_id
+    name                   = module.cdn_legacy.images_distribution_domain_name
+    zone_id                = module.cdn_legacy.images_distribution_hosted_zone_id
     evaluate_target_health = false
   }
 }

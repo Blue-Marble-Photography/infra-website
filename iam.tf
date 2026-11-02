@@ -1,14 +1,3 @@
-resource "aws_iam_role" "lambda_at_edge" {
-  name               = "${var.domain}-lambda-edge"
-  assume_role_policy = file("templates/iam-lambda-edge-trust.json")
-}
-
-resource "aws_iam_role_policy" "lambda_at_edge_logs" {
-  name   = "${var.domain}-logs"
-  role   = aws_iam_role.lambda_at_edge.id
-  policy = file("templates/iam-logs-policy.json")
-}
-
 # GitHub Actions bridge: credentials start in the site's new account (var.state_account_id,
 # infra-aws-base roles) and chain into these roles while the resources still live here.
 data "aws_iam_policy_document" "trust_state_account" {
@@ -58,7 +47,7 @@ data "aws_iam_policy_document" "website_deploy" {
 
   statement {
     actions   = ["cloudfront:CreateInvalidation", "cloudfront:GetInvalidation"]
-    resources = [aws_cloudfront_distribution.main.arn]
+    resources = [module.cdn_legacy.main_distribution_arn]
   }
 
   statement {

@@ -5,7 +5,7 @@ output "site_bucket_name" {
 
 output "site_distribution_id" {
   description = "CloudFront distribution for the site (CI variable CLOUDFRONT_DISTRIBUTION_ID)"
-  value       = aws_cloudfront_distribution.main.id
+  value       = module.cdn_legacy.main_distribution_id
 }
 
 output "images_bucket_name" {
@@ -15,7 +15,7 @@ output "images_bucket_name" {
 
 output "images_distribution_id" {
   description = "CloudFront distribution for images"
-  value       = aws_cloudfront_distribution.images.id
+  value       = module.cdn_legacy.images_distribution_id
 }
 
 output "bluemarble_infra_role_arn" {

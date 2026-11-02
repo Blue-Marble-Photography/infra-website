@@ -78,7 +78,7 @@ data "aws_iam_policy_document" "images_site" {
     condition {
       test     = "StringEquals"
       variable = "AWS:SourceArn"
-      values   = [aws_cloudfront_distribution.images.arn]
+      values   = [module.cdn_legacy.images_distribution_arn]
     }
   }
 
