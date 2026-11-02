@@ -18,16 +18,11 @@ resource "aws_route53domains_registered_domain" "domain" {
   tech_privacy       = true
   billing_privacy    = true
 
-  name_server {
-    name = "ns-1013.awsdns-62.net"
-  }
-  name_server {
-    name = "ns-1364.awsdns-42.org"
-  }
-  name_server {
-    name = "ns-1769.awsdns-29.co.uk"
-  }
-  name_server {
-    name = "ns-455.awsdns-56.com"
+  # The site-account zone (dns-site.tf). DNSSEC was dropped on 2026-11-01 before the move.
+  dynamic "name_server" {
+    for_each = aws_route53_zone.site.name_servers
+    content {
+      name = name_server.value
+    }
   }
 }
