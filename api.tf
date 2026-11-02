@@ -2,41 +2,23 @@
 # lambdas/resize-images). The 404_redirect Lambda@Edge sends missing image sizes to
 # https://api.bluemarble.photography/v1/resize. Created by hand in 2019; imported 2026-11-01.
 
-# Owned by the SAM stack; looked up so the mapping follows a redeployed API.
-data "aws_api_gateway_rest_api" "resize" {
-  name = "resize-images-app"
-}
+# The old account's custom domain and mapping were deleted by CLI just before this apply: API Gateway
+# allows a domain name in only one account, so the site-account copy below can only be created
+# after they are gone (account-migration.md, phase 4b).
+removed {
+  from = aws_api_gateway_base_path_mapping.api
 
-import {
-  to = aws_api_gateway_domain_name.api
-  id = "api.${var.domain}"
-}
-
-resource "aws_api_gateway_domain_name" "api" {
-  domain_name              = "api.${var.domain}"
-  regional_certificate_arn = aws_acm_certificate_validation.validation.certificate_arn
-  security_policy          = "TLS_1_2"
-
-  endpoint_configuration {
-    types = ["REGIONAL"]
-  }
-
-  # AWS echoes the regional certificate into the edge-only certificate_arn; clearing it is a no-op at best.
   lifecycle {
-    ignore_changes = [certificate_arn]
+    destroy = false
   }
 }
 
-import {
-  to = aws_api_gateway_base_path_mapping.api
-  id = "api.${var.domain}/v1"
-}
+removed {
+  from = aws_api_gateway_domain_name.api
 
-resource "aws_api_gateway_base_path_mapping" "api" {
-  domain_name = aws_api_gateway_domain_name.api.domain_name
-  api_id      = data.aws_api_gateway_rest_api.resize.id
-  stage_name  = "Prod"
-  base_path   = "v1"
+  lifecycle {
+    destroy = false
+  }
 }
 
 import {
@@ -50,8 +32,8 @@ resource "aws_route53_record" "api" {
   type    = "A"
 
   alias {
-    name                   = aws_api_gateway_domain_name.api.regional_domain_name
-    zone_id                = aws_api_gateway_domain_name.api.regional_zone_id
+    name                   = aws_api_gateway_domain_name.api_site.regional_domain_name
+    zone_id                = aws_api_gateway_domain_name.api_site.regional_zone_id
     evaluate_target_health = false
   }
 }
