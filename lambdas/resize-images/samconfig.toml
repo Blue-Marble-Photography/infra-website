@@ -3,7 +3,7 @@ version = 0.1
 [default.deploy]
 [default.deploy.parameters]
 stack_name = "resize-images-app"
-s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-jgpso52uwphy"
+resolve_s3 = true
 s3_prefix = "resize-images-app"
 region = "us-east-1"
 confirm_changeset = true

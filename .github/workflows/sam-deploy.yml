@@ -42,14 +42,6 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
 
-      # The stack still lives in the resources account until the account migration.
-      - name: Assume resources-account role
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
-        with:
-          role-to-assume: arn:aws:iam::530167849052:role/bluemarble-infra
-          role-chaining: true
-          aws-region: us-east-1
-
       - name: SAM build
         run: sam build
 
