@@ -104,7 +104,4 @@ module "cdn_site" {
   certificate_arn                    = aws_acm_certificate_validation.site.certificate_arn
   lambda_zip_path                    = "${path.module}/build/lambda-404-redirect-site.zip"
   ai_agents_pattern                  = local.ai_agents_pattern
-
-  # The aliases can attach here only after cdn_legacy has released them.
-  depends_on = [module.cdn_legacy]
 }
