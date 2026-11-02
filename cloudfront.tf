@@ -20,7 +20,8 @@ locals {
   ai_agents_pattern = join("|", local.ai_agents)
 }
 
-# CloudFront stack in the old account (530167849052), serving production until the phase 4 cutover.
+# CloudFront stack in the old account (530167849052). Its aliases moved to cdn_site in the phase 4b
+# cutover; it stays intact as the rollback until phase 5 deletes it.
 module "cdn_legacy" {
   source = "./modules/cdn"
 
@@ -28,6 +29,8 @@ module "cdn_legacy" {
   site_bucket_regional_domain_name   = aws_s3_bucket.main.bucket_regional_domain_name
   images_bucket_regional_domain_name = aws_s3_bucket.images_site.bucket_regional_domain_name
   certificate_arn                    = aws_acm_certificate_validation.validation.certificate_arn
+  aliases_enabled                    = false
+  wait_for_deployment                = false
   lambda_zip_path                    = "/tmp/lambda-404-redirect-${var.domain}.zip"
   ai_agents_pattern                  = local.ai_agents_pattern
 }
@@ -87,8 +90,8 @@ moved {
   to   = module.cdn_legacy.aws_iam_role_policy.lambda_at_edge_logs
 }
 
-# CloudFront stack in the site account (508360653481). The certificate is attached; the aliases move
-# here with `aws cloudfront associate-alias` (phase 4b), authorized by the TXT records in dns-site.tf.
+# CloudFront stack in the site account (508360653481), serving bluemarble.photography and images.*
+# since the phase 4b cutover.
 module "cdn_site" {
   source = "./modules/cdn"
   providers = {
@@ -99,7 +102,9 @@ module "cdn_site" {
   site_bucket_regional_domain_name   = aws_s3_bucket.site.bucket_regional_domain_name
   images_bucket_regional_domain_name = aws_s3_bucket.images_site.bucket_regional_domain_name
   certificate_arn                    = aws_acm_certificate_validation.site.certificate_arn
-  aliases_enabled                    = false
   lambda_zip_path                    = "${path.module}/build/lambda-404-redirect-site.zip"
   ai_agents_pattern                  = local.ai_agents_pattern
+
+  # The aliases can attach here only after cdn_legacy has released them.
+  depends_on = [module.cdn_legacy]
 }

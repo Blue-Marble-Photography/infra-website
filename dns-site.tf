@@ -16,8 +16,8 @@ resource "aws_route53_record" "site_root" {
   type     = "A"
 
   alias {
-    name                   = module.cdn_legacy.main_distribution_domain_name
-    zone_id                = module.cdn_legacy.main_distribution_hosted_zone_id
+    name                   = module.cdn_site.main_distribution_domain_name
+    zone_id                = module.cdn_site.main_distribution_hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -29,8 +29,8 @@ resource "aws_route53_record" "site_root_ipv6" {
   type     = "AAAA"
 
   alias {
-    name                   = module.cdn_legacy.main_distribution_domain_name
-    zone_id                = module.cdn_legacy.main_distribution_hosted_zone_id
+    name                   = module.cdn_site.main_distribution_domain_name
+    zone_id                = module.cdn_site.main_distribution_hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -42,8 +42,8 @@ resource "aws_route53_record" "site_images" {
   type     = "A"
 
   alias {
-    name                   = module.cdn_legacy.images_distribution_domain_name
-    zone_id                = module.cdn_legacy.images_distribution_hosted_zone_id
+    name                   = module.cdn_site.images_distribution_domain_name
+    zone_id                = module.cdn_site.images_distribution_hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -55,8 +55,8 @@ resource "aws_route53_record" "site_images_ipv6" {
   type     = "AAAA"
 
   alias {
-    name                   = module.cdn_legacy.images_distribution_domain_name
-    zone_id                = module.cdn_legacy.images_distribution_hosted_zone_id
+    name                   = module.cdn_site.images_distribution_domain_name
+    zone_id                = module.cdn_site.images_distribution_hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -127,32 +127,4 @@ resource "aws_route53_record" "site_acm_cert_validation" {
   records         = [each.value.record]
   ttl             = 60
   type            = each.value.type
-}
-
-# Authorize `aws cloudfront associate-alias` to move each alias to the site-account distribution
-# (phase 4b). Published in both zones while resolvers still reach the old one.
-locals {
-  alias_move_targets = {
-    (var.domain)           = module.cdn_site.main_distribution_domain_name
-    "images.${var.domain}" = module.cdn_site.images_distribution_domain_name
-  }
-}
-
-resource "aws_route53_record" "site_alias_move" {
-  for_each = local.alias_move_targets
-  provider = aws.site
-  zone_id  = aws_route53_zone.site.zone_id
-  name     = "_${each.key}"
-  type     = "TXT"
-  ttl      = 60
-  records  = [each.value]
-}
-
-resource "aws_route53_record" "alias_move" {
-  for_each = local.alias_move_targets
-  zone_id  = aws_route53_zone.zone.zone_id
-  name     = "_${each.key}"
-  type     = "TXT"
-  ttl      = 60
-  records  = [each.value]
 }

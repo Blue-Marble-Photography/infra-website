@@ -34,3 +34,9 @@ variable "aliases_enabled" {
   type        = bool
   default     = true
 }
+
+variable "wait_for_deployment" {
+  description = "Wait for each distribution change to finish deploying (false lets an alias removal be followed immediately by its re-add elsewhere)"
+  type        = bool
+  default     = true
+}
