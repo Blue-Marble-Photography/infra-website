@@ -87,8 +87,8 @@ moved {
   to   = module.cdn_legacy.aws_iam_role_policy.lambda_at_edge_logs
 }
 
-# CloudFront stack in the site account (508360653481). No certificate yet: it answers only on its
-# *.cloudfront.net domains until the phase 4 cutover moves the aliases here.
+# CloudFront stack in the site account (508360653481). The certificate is attached; the aliases move
+# here with `aws cloudfront associate-alias` (phase 4b), authorized by the TXT records in dns-site.tf.
 module "cdn_site" {
   source = "./modules/cdn"
   providers = {
@@ -98,7 +98,8 @@ module "cdn_site" {
   domain                             = var.domain
   site_bucket_regional_domain_name   = aws_s3_bucket.site.bucket_regional_domain_name
   images_bucket_regional_domain_name = aws_s3_bucket.images_site.bucket_regional_domain_name
-  certificate_arn                    = null
+  certificate_arn                    = aws_acm_certificate_validation.site.certificate_arn
+  aliases_enabled                    = false
   lambda_zip_path                    = "${path.module}/build/lambda-404-redirect-site.zip"
   ai_agents_pattern                  = local.ai_agents_pattern
 }
