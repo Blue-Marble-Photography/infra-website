@@ -55,3 +55,28 @@ resource "aws_route53_record" "api" {
     evaluate_target_health = false
   }
 }
+
+# Site-account copy (account-migration.md, phase 4b), mapped to the SAM stack deployed in 508360653481.
+data "aws_api_gateway_rest_api" "resize_site" {
+  provider = aws.site
+  name     = "resize-images-app"
+}
+
+resource "aws_api_gateway_domain_name" "api_site" {
+  provider                 = aws.site
+  domain_name              = "api.${var.domain}"
+  regional_certificate_arn = aws_acm_certificate_validation.site.certificate_arn
+  security_policy          = "TLS_1_2"
+
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
+}
+
+resource "aws_api_gateway_base_path_mapping" "api_site" {
+  provider    = aws.site
+  domain_name = aws_api_gateway_domain_name.api_site.domain_name
+  api_id      = data.aws_api_gateway_rest_api.resize_site.id
+  stage_name  = "Prod"
+  base_path   = "v1"
+}
