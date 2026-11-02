@@ -1,6 +1,21 @@
-output "main_distribution_id" {
-  description = "Site distribution ID"
-  value       = aws_cloudfront_distribution.main.id
+output "images_distribution_arn" {
+  description = "Images distribution ARN"
+  value       = aws_cloudfront_distribution.images.arn
+}
+
+output "images_distribution_domain_name" {
+  description = "Images distribution *.cloudfront.net domain"
+  value       = aws_cloudfront_distribution.images.domain_name
+}
+
+output "images_distribution_hosted_zone_id" {
+  description = "Hosted zone ID for Route 53 alias records to the images distribution"
+  value       = aws_cloudfront_distribution.images.hosted_zone_id
+}
+
+output "images_distribution_id" {
+  description = "Images distribution ID"
+  value       = aws_cloudfront_distribution.images.id
 }
 
 output "main_distribution_arn" {
@@ -18,22 +33,7 @@ output "main_distribution_hosted_zone_id" {
   value       = aws_cloudfront_distribution.main.hosted_zone_id
 }
 
-output "images_distribution_id" {
-  description = "Images distribution ID"
-  value       = aws_cloudfront_distribution.images.id
-}
-
-output "images_distribution_arn" {
-  description = "Images distribution ARN"
-  value       = aws_cloudfront_distribution.images.arn
-}
-
-output "images_distribution_domain_name" {
-  description = "Images distribution *.cloudfront.net domain"
-  value       = aws_cloudfront_distribution.images.domain_name
-}
-
-output "images_distribution_hosted_zone_id" {
-  description = "Hosted zone ID for Route 53 alias records to the images distribution"
-  value       = aws_cloudfront_distribution.images.hosted_zone_id
+output "main_distribution_id" {
+  description = "Site distribution ID"
+  value       = aws_cloudfront_distribution.main.id
 }

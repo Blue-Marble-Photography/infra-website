@@ -52,6 +52,7 @@ resource "aws_acm_certificate" "site" {
 }
 
 resource "aws_route53_record" "site_cert_validation" {
+  provider = aws.site
   for_each = {
     for dvo in aws_acm_certificate.site.domain_validation_options : dvo.domain_name => {
       name   = dvo.resource_record_name
@@ -59,7 +60,6 @@ resource "aws_route53_record" "site_cert_validation" {
       type   = dvo.resource_record_type
     }
   }
-  provider        = aws.site
   zone_id         = aws_route53_zone.site.zone_id
   allow_overwrite = true
   name            = each.value.name

@@ -3,10 +3,6 @@
 # distribution (OAC), so the name doesn't follow the hostname. The old images.bluemarble.photography
 # bucket (s3.tf) is kept as a rollback.
 
-locals {
-  images_site_bucket = "bluemarble-images-${var.site_account_id}"
-}
-
 #trivy:ignore:AVD-AWS-0090 # Versioning not required
 resource "aws_s3_bucket" "images_site" {
   provider      = aws.site

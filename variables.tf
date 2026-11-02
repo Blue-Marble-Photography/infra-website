@@ -4,26 +4,6 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
-variable "resources_account_id" {
-  description = "Account holding the site's resources until the account migration (provider assumes bluemarble-infra here)"
-  type        = string
-  default     = "530167849052"
-}
-
-variable "site_account_id" {
-  description = "Sub-account granted read access to the images bucket for the planned account migration"
-  type        = string
-  default     = "508360653481"
-}
-
-variable "tags" {
-  description = "Default tags applied to every resource"
-  type        = map(string)
-  default = {
-    Project = "bluemarble.photography"
-  }
-}
-
 variable "domain" {
   description = "Domain"
   type        = string
@@ -42,6 +22,28 @@ variable "mx_records" {
   default     = ["10 mail.protonmail.ch", "20 mailsec.protonmail.ch"]
 }
 
+variable "proton_dkim" {
+  description = "Proton Mail DKIM CNAMEs: selector => target"
+  type        = map(string)
+  default = {
+    protonmail  = "protonmail.domainkey.dsnmqp5ebgvgs3c5qn7fuswt4eprnwv3qldi3tlwgjmpwmg4wbria.domains.proton.ch."
+    protonmail2 = "protonmail2.domainkey.dsnmqp5ebgvgs3c5qn7fuswt4eprnwv3qldi3tlwgjmpwmg4wbria.domains.proton.ch."
+    protonmail3 = "protonmail3.domainkey.dsnmqp5ebgvgs3c5qn7fuswt4eprnwv3qldi3tlwgjmpwmg4wbria.domains.proton.ch."
+  }
+}
+
+variable "resources_account_id" {
+  description = "Account holding the site's resources until the account migration (provider assumes bluemarble-infra here)"
+  type        = string
+  default     = "530167849052"
+}
+
+variable "site_account_id" {
+  description = "Sub-account granted read access to the images bucket for the planned account migration"
+  type        = string
+  default     = "508360653481"
+}
+
 variable "site_verification" {
   description = "Apex TXT records: site verifications and SPF"
   type        = list(string)
@@ -53,18 +55,16 @@ variable "site_verification" {
   ]
 }
 
-variable "proton_dkim" {
-  description = "Proton Mail DKIM CNAMEs: selector => target"
-  type        = map(string)
-  default = {
-    protonmail  = "protonmail.domainkey.dsnmqp5ebgvgs3c5qn7fuswt4eprnwv3qldi3tlwgjmpwmg4wbria.domains.proton.ch."
-    protonmail2 = "protonmail2.domainkey.dsnmqp5ebgvgs3c5qn7fuswt4eprnwv3qldi3tlwgjmpwmg4wbria.domains.proton.ch."
-    protonmail3 = "protonmail3.domainkey.dsnmqp5ebgvgs3c5qn7fuswt4eprnwv3qldi3tlwgjmpwmg4wbria.domains.proton.ch."
-  }
-}
-
 variable "state_account_id" {
   description = "Site's own account: holds the OpenTofu state and the GitHub Actions roles (infra-aws-base)"
   type        = string
   default     = "508360653481"
+}
+
+variable "tags" {
+  description = "Default tags applied to every resource"
+  type        = map(string)
+  default = {
+    Project = "bluemarble.photography"
+  }
 }

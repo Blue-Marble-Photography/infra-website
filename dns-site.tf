@@ -102,8 +102,8 @@ resource "aws_route53_record" "site_dmarc" {
 }
 
 resource "aws_route53_record" "site_proton_dkim" {
-  for_each = var.proton_dkim
   provider = aws.site
+  for_each = var.proton_dkim
   zone_id  = aws_route53_zone.site.zone_id
   name     = "${each.key}._domainkey.${var.domain}"
   type     = "CNAME"
@@ -113,6 +113,7 @@ resource "aws_route53_record" "site_proton_dkim" {
 
 # Keeps the old account's certificate renewable until phase 5 replaces it.
 resource "aws_route53_record" "site_acm_cert_validation" {
+  provider = aws.site
   for_each = {
     for dvo in aws_acm_certificate.certificate.domain_validation_options : dvo.domain_name => {
       name   = dvo.resource_record_name
@@ -120,7 +121,6 @@ resource "aws_route53_record" "site_acm_cert_validation" {
       type   = dvo.resource_record_type
     }
   }
-  provider        = aws.site
   zone_id         = aws_route53_zone.site.zone_id
   allow_overwrite = true
   name            = each.value.name

@@ -3,11 +3,6 @@
 # Instantiated once per AWS account during the account migration; the provider passed in decides
 # the account. Lambda@Edge requires us-east-1.
 
-locals {
-  # With no certificate the distributions answer only on their *.cloudfront.net domains.
-  aliases_enabled = var.certificate_arn != null && var.aliases_enabled
-}
-
 resource "aws_cloudfront_function" "site_viewer_request" {
   name    = "${replace(var.domain, ".", "-")}-site-viewer-request"
   comment = "Reject AI crawlers; serve index.html for directory URLs"
