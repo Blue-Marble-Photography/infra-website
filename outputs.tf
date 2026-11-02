@@ -37,3 +37,13 @@ output "site_zone_name_servers" {
   description = "Name servers of the site-account hosted zone"
   value       = aws_route53_zone.site.name_servers
 }
+
+output "site_main_distribution_domain" {
+  description = "Site-account site distribution (*.cloudfront.net) for testing before the cutover"
+  value       = module.cdn_site.main_distribution_domain_name
+}
+
+output "site_images_distribution_domain" {
+  description = "Site-account images distribution (*.cloudfront.net) for testing before the cutover"
+  value       = module.cdn_site.images_distribution_domain_name
+}

@@ -86,3 +86,19 @@ moved {
   from = aws_iam_role_policy.lambda_at_edge_logs
   to   = module.cdn_legacy.aws_iam_role_policy.lambda_at_edge_logs
 }
+
+# CloudFront stack in the site account (508360653481). No certificate yet: it answers only on its
+# *.cloudfront.net domains until the phase 4 cutover moves the aliases here.
+module "cdn_site" {
+  source = "./modules/cdn"
+  providers = {
+    aws = aws.site
+  }
+
+  domain                             = var.domain
+  site_bucket_regional_domain_name   = aws_s3_bucket.site.bucket_regional_domain_name
+  images_bucket_regional_domain_name = aws_s3_bucket.images_site.bucket_regional_domain_name
+  certificate_arn                    = null
+  lambda_zip_path                    = "${path.module}/build/lambda-404-redirect-site.zip"
+  ai_agents_pattern                  = local.ai_agents_pattern
+}

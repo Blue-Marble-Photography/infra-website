@@ -68,3 +68,34 @@ resource "aws_iam_role_policy" "website_deploy" {
   role   = aws_iam_role.website_deploy.id
   policy = data.aws_iam_policy_document.website_deploy.json
 }
+
+# Direct deploy permissions for the website workflow's OIDC role (infra-aws-base) once it stops
+# chaining into bluemarble-website-deploy.
+data "aws_iam_policy_document" "site_website_deploy" {
+  statement {
+    actions   = ["s3:ListBucket"]
+    resources = [aws_s3_bucket.site.arn]
+  }
+
+  statement {
+    actions   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
+    resources = ["${aws_s3_bucket.site.arn}/*"]
+  }
+
+  statement {
+    actions   = ["cloudfront:CreateInvalidation", "cloudfront:GetInvalidation"]
+    resources = [module.cdn_site.main_distribution_arn]
+  }
+
+  statement {
+    actions   = ["ssm:GetParameter"]
+    resources = ["arn:aws:ssm:${var.aws_region}:${var.site_account_id}:parameter/website/*"]
+  }
+}
+
+resource "aws_iam_role_policy" "site_website_deploy" {
+  provider = aws.site
+  name     = "website-deploy"
+  role     = "github-actions-website"
+  policy   = data.aws_iam_policy_document.site_website_deploy.json
+}
