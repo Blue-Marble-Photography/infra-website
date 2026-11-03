@@ -54,7 +54,7 @@ data "aws_iam_policy_document" "site" {
     condition {
       test     = "StringEquals"
       variable = "AWS:SourceArn"
-      values   = [module.cdn_site.main_distribution_arn]
+      values   = [module.cdn.main_distribution_arn]
     }
   }
 }

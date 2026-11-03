@@ -1,42 +1,15 @@
-resource "aws_acm_certificate" "certificate" {
-  domain_name               = var.domain
-  validation_method         = "DNS"
-  subject_alternative_names = var.domain_aliases
-
-  options {
-    certificate_transparency_logging_preference = "ENABLED"
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
+moved {
+  from = aws_acm_certificate.site
+  to   = aws_acm_certificate.main
 }
 
-resource "aws_acm_certificate_validation" "validation" {
-  certificate_arn         = aws_acm_certificate.certificate.arn
-  validation_record_fqdns = [for record in aws_route53_record.acm_cert_validation : record.fqdn]
+moved {
+  from = aws_acm_certificate_validation.site
+  to   = aws_acm_certificate_validation.main
 }
 
-resource "aws_route53_record" "acm_cert_validation" {
-  for_each = {
-    for dvo in aws_acm_certificate.certificate.domain_validation_options : dvo.domain_name => {
-      name    = dvo.resource_record_name
-      record  = dvo.resource_record_value
-      type    = dvo.resource_record_type
-      zone_id = aws_route53_zone.zone.zone_id
-    }
-  }
-  allow_overwrite = true
-  name            = each.value.name
-  records         = [each.value.record]
-  ttl             = 60
-  type            = each.value.type
-  zone_id         = each.value.zone_id
-}
-
-# Certificate in the site account for the phase 4 distributions and API domain, validated in the
-# site-account zone (dns-site.tf).
-resource "aws_acm_certificate" "site" {
+# Certificate for bluemarble.photography, images.* and api.*, validated in the site zone (dns-site.tf).
+resource "aws_acm_certificate" "main" {
   provider                  = aws.site
   domain_name               = var.domain
   validation_method         = "DNS"
@@ -54,7 +27,7 @@ resource "aws_acm_certificate" "site" {
 resource "aws_route53_record" "site_cert_validation" {
   provider = aws.site
   for_each = {
-    for dvo in aws_acm_certificate.site.domain_validation_options : dvo.domain_name => {
+    for dvo in aws_acm_certificate.main.domain_validation_options : dvo.domain_name => {
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
@@ -68,8 +41,8 @@ resource "aws_route53_record" "site_cert_validation" {
   type            = each.value.type
 }
 
-resource "aws_acm_certificate_validation" "site" {
+resource "aws_acm_certificate_validation" "main" {
   provider                = aws.site
-  certificate_arn         = aws_acm_certificate.site.arn
+  certificate_arn         = aws_acm_certificate.main.arn
   validation_record_fqdns = [for record in aws_route53_record.site_cert_validation : record.fqdn]
 }

@@ -1,46 +1,5 @@
 #trivy:ignore:AVD-AWS-0090 # Versioning not required
 #trivy:ignore:AVD-AWS-0320 # Bucket names match the CloudFront domain names
-resource "aws_s3_bucket" "main" {
-  bucket        = var.domain
-  force_destroy = false
-}
-
-resource "aws_s3_bucket_acl" "main" {
-  bucket = aws_s3_bucket.main.id
-  acl    = "private"
-}
-
-resource "aws_s3_bucket_policy" "main" {
-  bucket = aws_s3_bucket.main.id
-  policy = templatefile("templates/s3-cloudfront-policy.json", {
-    bucket              = var.domain
-    distribution_arn    = module.cdn_legacy.main_distribution_arn
-    delegate_account_id = ""
-  })
-}
-
-resource "aws_s3_bucket_public_access_block" "main" {
-  bucket = aws_s3_bucket.main.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
-
-#trivy:ignore:AVD-AWS-0132 # AWS managed S3 key ok
-resource "aws_s3_bucket_server_side_encryption_configuration" "main" {
-  bucket = aws_s3_bucket.main.id
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
-  }
-}
-
-#trivy:ignore:AVD-AWS-0090 # Versioning not required
-#trivy:ignore:AVD-AWS-0320 # Bucket names match the CloudFront domain names
 resource "aws_s3_bucket" "images" {
   bucket        = "images.${var.domain}"
   force_destroy = false
@@ -49,15 +8,6 @@ resource "aws_s3_bucket" "images" {
 resource "aws_s3_bucket_acl" "images" {
   bucket = aws_s3_bucket.images.id
   acl    = "private"
-}
-
-resource "aws_s3_bucket_policy" "images" {
-  bucket = aws_s3_bucket.images.id
-  policy = templatefile("templates/s3-cloudfront-policy.json", {
-    bucket              = "images.${var.domain}"
-    distribution_arn    = module.cdn_legacy.images_distribution_arn
-    delegate_account_id = var.site_account_id
-  })
 }
 
 resource "aws_s3_bucket_public_access_block" "images" {

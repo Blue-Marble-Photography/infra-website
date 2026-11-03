@@ -1,5 +1,5 @@
 # Images bucket in the site's own account (508360653481): the images distribution's origin and the
-# resize Lambda's bucket (cross-account from 530167849052). Viewers only reach it through the images
+# resize Lambda's bucket (same account; its SAM-managed role grants the access). Viewers only reach it through the images
 # distribution (OAC), so the name doesn't follow the hostname. The old images.bluemarble.photography
 # bucket (s3.tf) is kept as a rollback.
 
@@ -74,26 +74,7 @@ data "aws_iam_policy_document" "images_site" {
     condition {
       test     = "StringEquals"
       variable = "AWS:SourceArn"
-      values   = [module.cdn_legacy.images_distribution_arn, module.cdn_site.images_distribution_arn]
-    }
-  }
-
-  # The SAM stack names the role ResizeImagesFunctionRole-<random>; match the prefix so a
-  # stack redeploy that recreates the role keeps access.
-  statement {
-    sid       = "AllowResizeLambda"
-    actions   = ["s3:GetObject", "s3:PutObject"]
-    resources = ["${aws_s3_bucket.images_site.arn}/*"]
-
-    principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${var.resources_account_id}:root"]
-    }
-
-    condition {
-      test     = "ArnLike"
-      variable = "aws:PrincipalArn"
-      values   = ["arn:aws:iam::${var.resources_account_id}:role/resize-images-app-ResizeImagesFunctionRole-*"]
+      values   = [module.cdn.images_distribution_arn]
     }
   }
 }

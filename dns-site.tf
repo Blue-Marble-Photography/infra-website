@@ -16,8 +16,8 @@ resource "aws_route53_record" "site_root" {
   type     = "A"
 
   alias {
-    name                   = module.cdn_site.main_distribution_domain_name
-    zone_id                = module.cdn_site.main_distribution_hosted_zone_id
+    name                   = module.cdn.main_distribution_domain_name
+    zone_id                = module.cdn.main_distribution_hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -29,8 +29,8 @@ resource "aws_route53_record" "site_root_ipv6" {
   type     = "AAAA"
 
   alias {
-    name                   = module.cdn_site.main_distribution_domain_name
-    zone_id                = module.cdn_site.main_distribution_hosted_zone_id
+    name                   = module.cdn.main_distribution_domain_name
+    zone_id                = module.cdn.main_distribution_hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -42,8 +42,8 @@ resource "aws_route53_record" "site_images" {
   type     = "A"
 
   alias {
-    name                   = module.cdn_site.images_distribution_domain_name
-    zone_id                = module.cdn_site.images_distribution_hosted_zone_id
+    name                   = module.cdn.images_distribution_domain_name
+    zone_id                = module.cdn.images_distribution_hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -55,8 +55,8 @@ resource "aws_route53_record" "site_images_ipv6" {
   type     = "AAAA"
 
   alias {
-    name                   = module.cdn_site.images_distribution_domain_name
-    zone_id                = module.cdn_site.images_distribution_hosted_zone_id
+    name                   = module.cdn.images_distribution_domain_name
+    zone_id                = module.cdn.images_distribution_hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -68,8 +68,8 @@ resource "aws_route53_record" "site_api" {
   type     = "A"
 
   alias {
-    name                   = aws_api_gateway_domain_name.api_site.regional_domain_name
-    zone_id                = aws_api_gateway_domain_name.api_site.regional_zone_id
+    name                   = aws_api_gateway_domain_name.api.regional_domain_name
+    zone_id                = aws_api_gateway_domain_name.api.regional_zone_id
     evaluate_target_health = false
   }
 }
@@ -109,22 +109,4 @@ resource "aws_route53_record" "site_proton_dkim" {
   type     = "CNAME"
   ttl      = "300"
   records  = [each.value]
-}
-
-# Keeps the old account's certificate renewable until phase 5 replaces it.
-resource "aws_route53_record" "site_acm_cert_validation" {
-  provider = aws.site
-  for_each = {
-    for dvo in aws_acm_certificate.certificate.domain_validation_options : dvo.domain_name => {
-      name   = dvo.resource_record_name
-      record = dvo.resource_record_value
-      type   = dvo.resource_record_type
-    }
-  }
-  zone_id         = aws_route53_zone.site.zone_id
-  allow_overwrite = true
-  name            = each.value.name
-  records         = [each.value.record]
-  ttl             = 60
-  type            = each.value.type
 }

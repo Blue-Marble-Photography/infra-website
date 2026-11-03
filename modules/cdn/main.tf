@@ -1,7 +1,6 @@
 # CloudFront stack for the site and images: viewer-request functions, cache and response
 # headers policies, OAC, both distributions, and the 404_redirect Lambda@Edge.
-# Instantiated once per AWS account during the account migration; the provider passed in decides
-# the account. Lambda@Edge requires us-east-1.
+# The provider passed in decides the account; Lambda@Edge requires us-east-1.
 
 resource "aws_cloudfront_function" "site_viewer_request" {
   name    = "${replace(var.domain, ".", "-")}-site-viewer-request"
@@ -25,7 +24,7 @@ resource "aws_cloudfront_function" "images_viewer_request" {
   })
 }
 
-data "aws_cloudfront_cache_policy" "cache_policy" {
+data "aws_cloudfront_cache_policy" "caching_optimized" {
   name = "Managed-CachingOptimized"
 }
 
@@ -76,7 +75,6 @@ resource "aws_cloudfront_distribution" "main" {
   }
   enabled             = true
   is_ipv6_enabled     = true
-  wait_for_deployment = var.wait_for_deployment
   aliases             = local.aliases_enabled ? [var.domain] : []
   default_root_object = "index.html"
   price_class         = "PriceClass_100"
@@ -89,7 +87,7 @@ resource "aws_cloudfront_distribution" "main" {
   }
 
   default_cache_behavior {
-    cache_policy_id            = data.aws_cloudfront_cache_policy.cache_policy.id
+    cache_policy_id            = data.aws_cloudfront_cache_policy.caching_optimized.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
     allowed_methods            = ["GET", "HEAD"] # OPTIONS?
     cached_methods             = ["GET", "HEAD"]
@@ -254,7 +252,6 @@ resource "aws_cloudfront_distribution" "images" {
   }
   enabled             = true
   is_ipv6_enabled     = true
-  wait_for_deployment = var.wait_for_deployment
   aliases             = local.aliases_enabled ? ["images.${var.domain}"] : []
   default_root_object = "index.html"
   price_class         = "PriceClass_100"

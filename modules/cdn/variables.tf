@@ -3,12 +3,6 @@ variable "ai_agents_pattern" {
   type        = string
 }
 
-variable "aliases_enabled" {
-  description = "Attach the domain aliases (needs certificate_arn); false lets the certificate attach before the aliases move here"
-  type        = bool
-  default     = true
-}
-
 variable "certificate_arn" {
   description = "Validated ACM certificate for the aliases; null serves the default *.cloudfront.net certificate and no aliases"
   type        = string
@@ -33,10 +27,4 @@ variable "lambda_zip_path" {
 variable "site_bucket_regional_domain_name" {
   description = "Regional domain name of the S3 bucket holding the built website"
   type        = string
-}
-
-variable "wait_for_deployment" {
-  description = "Wait for each distribution change to finish deploying (false lets an alias removal be followed immediately by its re-add elsewhere)"
-  type        = bool
-  default     = true
 }

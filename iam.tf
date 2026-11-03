@@ -23,52 +23,6 @@ resource "aws_iam_role_policy_attachment" "bluemarble_infra_admin" {
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
-data "aws_iam_policy_document" "website_deploy_trust" {
-  statement {
-    actions = ["sts:AssumeRole", "sts:TagSession"]
-
-    principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${var.state_account_id}:role/github-actions-website"]
-    }
-  }
-}
-
-data "aws_iam_policy_document" "website_deploy" {
-  statement {
-    actions   = ["s3:ListBucket"]
-    resources = [aws_s3_bucket.main.arn]
-  }
-
-  statement {
-    actions   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
-    resources = ["${aws_s3_bucket.main.arn}/*"]
-  }
-
-  statement {
-    actions   = ["cloudfront:CreateInvalidation", "cloudfront:GetInvalidation"]
-    resources = [module.cdn_legacy.main_distribution_arn]
-  }
-
-  statement {
-    actions   = ["ssm:GetParameter"]
-    resources = ["arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.account.account_id}:parameter/website/*"]
-  }
-}
-
-# Assumed by the website repo's deploy workflow (via github-actions-website).
-resource "aws_iam_role" "website_deploy" {
-  name                 = "bluemarble-website-deploy"
-  assume_role_policy   = data.aws_iam_policy_document.website_deploy_trust.json
-  max_session_duration = 3600
-}
-
-resource "aws_iam_role_policy" "website_deploy" {
-  name   = "website-deploy"
-  role   = aws_iam_role.website_deploy.id
-  policy = data.aws_iam_policy_document.website_deploy.json
-}
-
 # Direct deploy permissions for the website workflow's OIDC role (infra-aws-base) once it stops
 # chaining into bluemarble-website-deploy.
 data "aws_iam_policy_document" "site_website_deploy" {
@@ -84,7 +38,7 @@ data "aws_iam_policy_document" "site_website_deploy" {
 
   statement {
     actions   = ["cloudfront:CreateInvalidation", "cloudfront:GetInvalidation"]
-    resources = [module.cdn_site.main_distribution_arn]
+    resources = [module.cdn.main_distribution_arn]
   }
 
   statement {
