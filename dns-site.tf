@@ -2,7 +2,7 @@
 # old zone (dns.tf, acm.tf, api.tf) until the registration's name servers switch here; then the
 # old zone and its records go away. No DNSSEC.
 
-resource "aws_route53_zone" "site" {
+resource "aws_route53_zone" "main" {
   provider      = aws.site
   name          = var.domain
   comment       = "bluemarble.photography (site account)"
@@ -11,7 +11,7 @@ resource "aws_route53_zone" "site" {
 
 resource "aws_route53_record" "site_root" {
   provider = aws.site
-  zone_id  = aws_route53_zone.site.zone_id
+  zone_id  = aws_route53_zone.main.zone_id
   name     = var.domain
   type     = "A"
 
@@ -24,7 +24,7 @@ resource "aws_route53_record" "site_root" {
 
 resource "aws_route53_record" "site_root_ipv6" {
   provider = aws.site
-  zone_id  = aws_route53_zone.site.zone_id
+  zone_id  = aws_route53_zone.main.zone_id
   name     = var.domain
   type     = "AAAA"
 
@@ -37,7 +37,7 @@ resource "aws_route53_record" "site_root_ipv6" {
 
 resource "aws_route53_record" "site_images" {
   provider = aws.site
-  zone_id  = aws_route53_zone.site.zone_id
+  zone_id  = aws_route53_zone.main.zone_id
   name     = "images.${var.domain}"
   type     = "A"
 
@@ -50,7 +50,7 @@ resource "aws_route53_record" "site_images" {
 
 resource "aws_route53_record" "site_images_ipv6" {
   provider = aws.site
-  zone_id  = aws_route53_zone.site.zone_id
+  zone_id  = aws_route53_zone.main.zone_id
   name     = "images.${var.domain}"
   type     = "AAAA"
 
@@ -63,7 +63,7 @@ resource "aws_route53_record" "site_images_ipv6" {
 
 resource "aws_route53_record" "site_api" {
   provider = aws.site
-  zone_id  = aws_route53_zone.site.zone_id
+  zone_id  = aws_route53_zone.main.zone_id
   name     = "api.${var.domain}"
   type     = "A"
 
@@ -76,7 +76,7 @@ resource "aws_route53_record" "site_api" {
 
 resource "aws_route53_record" "site_mx" {
   provider = aws.site
-  zone_id  = aws_route53_zone.site.zone_id
+  zone_id  = aws_route53_zone.main.zone_id
   name     = var.domain
   type     = "MX"
   ttl      = "300"
@@ -85,7 +85,7 @@ resource "aws_route53_record" "site_mx" {
 
 resource "aws_route53_record" "site_txt" {
   provider = aws.site
-  zone_id  = aws_route53_zone.site.zone_id
+  zone_id  = aws_route53_zone.main.zone_id
   name     = var.domain
   type     = "TXT"
   ttl      = "300"
@@ -94,7 +94,7 @@ resource "aws_route53_record" "site_txt" {
 
 resource "aws_route53_record" "site_dmarc" {
   provider = aws.site
-  zone_id  = aws_route53_zone.site.zone_id
+  zone_id  = aws_route53_zone.main.zone_id
   name     = "_dmarc.${var.domain}"
   type     = "TXT"
   ttl      = "300"
@@ -104,7 +104,7 @@ resource "aws_route53_record" "site_dmarc" {
 resource "aws_route53_record" "site_proton_dkim" {
   provider = aws.site
   for_each = var.proton_dkim
-  zone_id  = aws_route53_zone.site.zone_id
+  zone_id  = aws_route53_zone.main.zone_id
   name     = "${each.key}._domainkey.${var.domain}"
   type     = "CNAME"
   ttl      = "300"

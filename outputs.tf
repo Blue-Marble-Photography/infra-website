@@ -20,7 +20,7 @@ output "images_site_bucket_name" {
 
 output "site_bucket_name" {
   description = "S3 bucket the website deploys to"
-  value       = aws_s3_bucket.site.id
+  value       = aws_s3_bucket.main.id
 }
 
 output "site_distribution_id" {
@@ -30,5 +30,5 @@ output "site_distribution_id" {
 
 output "site_zone_name_servers" {
   description = "Name servers of the site-account hosted zone"
-  value       = aws_route53_zone.site.name_servers
+  value       = aws_route53_zone.main.name_servers
 }

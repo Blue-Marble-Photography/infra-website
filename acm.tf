@@ -1,13 +1,3 @@
-moved {
-  from = aws_acm_certificate.site
-  to   = aws_acm_certificate.main
-}
-
-moved {
-  from = aws_acm_certificate_validation.site
-  to   = aws_acm_certificate_validation.main
-}
-
 # Certificate for bluemarble.photography, images.* and api.*, validated in the site zone (dns-site.tf).
 resource "aws_acm_certificate" "main" {
   provider                  = aws.site
@@ -24,7 +14,7 @@ resource "aws_acm_certificate" "main" {
   }
 }
 
-resource "aws_route53_record" "site_cert_validation" {
+resource "aws_route53_record" "acm_cert_validation" {
   provider = aws.site
   for_each = {
     for dvo in aws_acm_certificate.main.domain_validation_options : dvo.domain_name => {
@@ -33,7 +23,7 @@ resource "aws_route53_record" "site_cert_validation" {
       type   = dvo.resource_record_type
     }
   }
-  zone_id         = aws_route53_zone.site.zone_id
+  zone_id         = aws_route53_zone.main.zone_id
   allow_overwrite = true
   name            = each.value.name
   records         = [each.value.record]
@@ -44,5 +34,5 @@ resource "aws_route53_record" "site_cert_validation" {
 resource "aws_acm_certificate_validation" "main" {
   provider                = aws.site
   certificate_arn         = aws_acm_certificate.main.arn
-  validation_record_fqdns = [for record in aws_route53_record.site_cert_validation : record.fqdn]
+  validation_record_fqdns = [for record in aws_route53_record.acm_cert_validation : record.fqdn]
 }
