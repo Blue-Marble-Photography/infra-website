@@ -3,12 +3,10 @@
 # https://api.bluemarble.photography/v1/resize. Created by hand in 2019; imported 2026-11-01.
 
 data "aws_api_gateway_rest_api" "resize" {
-  provider = aws.site
-  name     = "resize-images-app"
+  name = "resize-images-app"
 }
 
 resource "aws_api_gateway_domain_name" "api" {
-  provider                 = aws.site
   domain_name              = "api.${var.domain}"
   regional_certificate_arn = aws_acm_certificate_validation.main.certificate_arn
   security_policy          = "TLS_1_2"
@@ -19,7 +17,6 @@ resource "aws_api_gateway_domain_name" "api" {
 }
 
 resource "aws_api_gateway_base_path_mapping" "api" {
-  provider    = aws.site
   domain_name = aws_api_gateway_domain_name.api.domain_name
   api_id      = data.aws_api_gateway_rest_api.resize.id
   stage_name  = "Prod"

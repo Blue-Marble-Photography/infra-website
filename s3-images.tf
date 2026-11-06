@@ -3,25 +3,22 @@
 # (OAC), so the name doesn't follow the hostname.
 
 #trivy:ignore:AVD-AWS-0090 # Versioning not required
-resource "aws_s3_bucket" "images_site" {
-  provider      = aws.site
-  bucket        = local.images_site_bucket
+resource "aws_s3_bucket" "images" {
+  bucket        = local.images_bucket
   force_destroy = false
 }
 
 # Objects the resize Lambda writes from 530167849052 belong to this account; ACLs are disabled.
-resource "aws_s3_bucket_ownership_controls" "images_site" {
-  provider = aws.site
-  bucket   = aws_s3_bucket.images_site.id
+resource "aws_s3_bucket_ownership_controls" "images" {
+  bucket = aws_s3_bucket.images.id
 
   rule {
     object_ownership = "BucketOwnerEnforced"
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "images_site" {
-  provider = aws.site
-  bucket   = aws_s3_bucket.images_site.id
+resource "aws_s3_bucket_public_access_block" "images" {
+  bucket = aws_s3_bucket.images.id
 
   block_public_acls       = true
   block_public_policy     = true
@@ -30,9 +27,8 @@ resource "aws_s3_bucket_public_access_block" "images_site" {
 }
 
 #trivy:ignore:AVD-AWS-0132 # AWS managed S3 key ok
-resource "aws_s3_bucket_server_side_encryption_configuration" "images_site" {
-  provider = aws.site
-  bucket   = aws_s3_bucket.images_site.id
+resource "aws_s3_bucket_server_side_encryption_configuration" "images" {
+  bucket = aws_s3_bucket.images.id
 
   rule {
     apply_server_side_encryption_by_default {
@@ -41,9 +37,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "images_site" {
   }
 }
 
-resource "aws_s3_bucket_lifecycle_configuration" "images_site" {
-  provider                               = aws.site
-  bucket                                 = aws_s3_bucket.images_site.id
+resource "aws_s3_bucket_lifecycle_configuration" "images" {
+  bucket                                 = aws_s3_bucket.images.id
   transition_default_minimum_object_size = "varies_by_storage_class"
 
   rule {
@@ -59,11 +54,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "images_site" {
   }
 }
 
-data "aws_iam_policy_document" "images_site" {
+data "aws_iam_policy_document" "images" {
   statement {
     sid       = "AllowCloudFrontOAC"
     actions   = ["s3:GetObject", "s3:ListBucket"]
-    resources = [aws_s3_bucket.images_site.arn, "${aws_s3_bucket.images_site.arn}/*"]
+    resources = [aws_s3_bucket.images.arn, "${aws_s3_bucket.images.arn}/*"]
 
     principals {
       type        = "Service"
@@ -78,26 +73,23 @@ data "aws_iam_policy_document" "images_site" {
   }
 }
 
-resource "aws_s3_bucket_policy" "images_site" {
-  provider = aws.site
-  bucket   = aws_s3_bucket.images_site.id
-  policy   = data.aws_iam_policy_document.images_site.json
+resource "aws_s3_bucket_policy" "images" {
+  bucket = aws_s3_bucket.images.id
+  policy = data.aws_iam_policy_document.images.json
 
-  depends_on = [aws_s3_bucket_public_access_block.images_site]
+  depends_on = [aws_s3_bucket_public_access_block.images]
 }
 
-resource "aws_s3_object" "images_site_robots" {
-  provider      = aws.site
-  bucket        = aws_s3_bucket.images_site.id
+resource "aws_s3_object" "images_robots" {
+  bucket        = aws_s3_bucket.images.id
   key           = "robots.txt"
   content       = file("templates/robots-images.txt")
   content_type  = "text/plain"
   cache_control = "max-age=86400"
 }
 
-resource "aws_s3_object" "images_site_tdmrep" {
-  provider      = aws.site
-  bucket        = aws_s3_bucket.images_site.id
+resource "aws_s3_object" "images_tdmrep" {
+  bucket        = aws_s3_bucket.images.id
   key           = ".well-known/tdmrep.json"
   content       = file("templates/tdmrep.json")
   content_type  = "application/json"

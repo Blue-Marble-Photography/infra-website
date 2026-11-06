@@ -2,7 +2,6 @@
 # 2026-11-01. Name servers point at the hosted zone that serves the domain.
 
 resource "aws_route53domains_registered_domain" "main" {
-  provider    = aws.site
   domain_name = var.domain
 
   auto_renew    = true

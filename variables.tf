@@ -32,14 +32,8 @@ variable "proton_dkim" {
   }
 }
 
-variable "resources_account_id" {
-  description = "Account holding the site's resources until the account migration (provider assumes bluemarble-infra here)"
-  type        = string
-  default     = "530167849052"
-}
-
 variable "site_account_id" {
-  description = "Sub-account granted read access to the images bucket for the planned account migration"
+  description = "Site account (508360653481): holds every resource, the state, and the CI roles"
   type        = string
   default     = "508360653481"
 }
@@ -53,12 +47,6 @@ variable "site_verification" {
     "protonmail-verification=b58d71fb285e75888a242966d213c442c8f96572",
     "v=spf1 include:_spf.protonmail.ch ~all"
   ]
-}
-
-variable "state_account_id" {
-  description = "Site's own account: holds the OpenTofu state and the GitHub Actions roles (infra-aws-base)"
-  type        = string
-  default     = "508360653481"
 }
 
 variable "tags" {

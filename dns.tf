@@ -2,17 +2,15 @@
 # 2026-11-01 when the zone moved accounts.
 
 resource "aws_route53_zone" "main" {
-  provider      = aws.site
   name          = var.domain
   comment       = "bluemarble.photography (site account)"
   force_destroy = false
 }
 
 resource "aws_route53_record" "root" {
-  provider = aws.site
-  zone_id  = aws_route53_zone.main.zone_id
-  name     = var.domain
-  type     = "A"
+  zone_id = aws_route53_zone.main.zone_id
+  name    = var.domain
+  type    = "A"
 
   alias {
     name                   = module.cdn.main_distribution_domain_name
@@ -22,10 +20,9 @@ resource "aws_route53_record" "root" {
 }
 
 resource "aws_route53_record" "root_ipv6" {
-  provider = aws.site
-  zone_id  = aws_route53_zone.main.zone_id
-  name     = var.domain
-  type     = "AAAA"
+  zone_id = aws_route53_zone.main.zone_id
+  name    = var.domain
+  type    = "AAAA"
 
   alias {
     name                   = module.cdn.main_distribution_domain_name
@@ -35,10 +32,9 @@ resource "aws_route53_record" "root_ipv6" {
 }
 
 resource "aws_route53_record" "images" {
-  provider = aws.site
-  zone_id  = aws_route53_zone.main.zone_id
-  name     = "images.${var.domain}"
-  type     = "A"
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "images.${var.domain}"
+  type    = "A"
 
   alias {
     name                   = module.cdn.images_distribution_domain_name
@@ -48,10 +44,9 @@ resource "aws_route53_record" "images" {
 }
 
 resource "aws_route53_record" "images_ipv6" {
-  provider = aws.site
-  zone_id  = aws_route53_zone.main.zone_id
-  name     = "images.${var.domain}"
-  type     = "AAAA"
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "images.${var.domain}"
+  type    = "AAAA"
 
   alias {
     name                   = module.cdn.images_distribution_domain_name
@@ -61,10 +56,9 @@ resource "aws_route53_record" "images_ipv6" {
 }
 
 resource "aws_route53_record" "api" {
-  provider = aws.site
-  zone_id  = aws_route53_zone.main.zone_id
-  name     = "api.${var.domain}"
-  type     = "A"
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "api.${var.domain}"
+  type    = "A"
 
   alias {
     name                   = aws_api_gateway_domain_name.api.regional_domain_name
@@ -74,34 +68,30 @@ resource "aws_route53_record" "api" {
 }
 
 resource "aws_route53_record" "mx" {
-  provider = aws.site
-  zone_id  = aws_route53_zone.main.zone_id
-  name     = var.domain
-  type     = "MX"
-  ttl      = "300"
-  records  = var.mx_records
+  zone_id = aws_route53_zone.main.zone_id
+  name    = var.domain
+  type    = "MX"
+  ttl     = "300"
+  records = var.mx_records
 }
 
 resource "aws_route53_record" "txt" {
-  provider = aws.site
-  zone_id  = aws_route53_zone.main.zone_id
-  name     = var.domain
-  type     = "TXT"
-  ttl      = "300"
-  records  = var.site_verification
+  zone_id = aws_route53_zone.main.zone_id
+  name    = var.domain
+  type    = "TXT"
+  ttl     = "300"
+  records = var.site_verification
 }
 
 resource "aws_route53_record" "dmarc" {
-  provider = aws.site
-  zone_id  = aws_route53_zone.main.zone_id
-  name     = "_dmarc.${var.domain}"
-  type     = "TXT"
-  ttl      = "300"
-  records  = ["v=DMARC1; p=quarantine"]
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "_dmarc.${var.domain}"
+  type    = "TXT"
+  ttl     = "300"
+  records = ["v=DMARC1; p=quarantine"]
 }
 
 resource "aws_route53_record" "proton_dkim" {
-  provider = aws.site
   for_each = var.proton_dkim
   zone_id  = aws_route53_zone.main.zone_id
   name     = "${each.key}._domainkey.${var.domain}"

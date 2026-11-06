@@ -1,26 +1,19 @@
-# GitHub Actions bridge: credentials start in the site's new account (var.state_account_id,
-# infra-aws-base roles) and chain into these roles while the resources still live here.
-data "aws_iam_policy_document" "trust_state_account" {
-  statement {
-    actions = ["sts:AssumeRole", "sts:TagSession"]
+# bluemarble-infra (530167849052) was the role the provider assumed before the account migration.
+# Tofu can't delete the role it runs as, so phase 5c drops it from state and it is deleted by CLI.
+removed {
+  from = aws_iam_role_policy_attachment.bluemarble_infra_admin
 
-    principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${var.state_account_id}:root"]
-    }
+  lifecycle {
+    destroy = false
   }
 }
 
-# Assumed by the aws provider (local runs and infra-* pipelines).
-resource "aws_iam_role" "bluemarble_infra" {
-  name                 = "bluemarble-infra"
-  assume_role_policy   = data.aws_iam_policy_document.trust_state_account.json
-  max_session_duration = 3600
-}
+removed {
+  from = aws_iam_role.bluemarble_infra
 
-resource "aws_iam_role_policy_attachment" "bluemarble_infra_admin" {
-  role       = aws_iam_role.bluemarble_infra.name
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+  lifecycle {
+    destroy = false
+  }
 }
 
 # Direct deploy permissions for the website workflow's OIDC role (infra-aws-base) once it stops
@@ -48,8 +41,7 @@ data "aws_iam_policy_document" "website_deploy" {
 }
 
 resource "aws_iam_role_policy" "website_deploy" {
-  provider = aws.site
-  name     = "website-deploy"
-  role     = "github-actions-website"
-  policy   = data.aws_iam_policy_document.website_deploy.json
+  name   = "website-deploy"
+  role   = "github-actions-website"
+  policy = data.aws_iam_policy_document.website_deploy.json
 }

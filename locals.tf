@@ -19,5 +19,5 @@ locals {
   # Names are letters, digits, hyphens, and spaces only, so no regex escaping is needed.
   ai_agents_pattern = join("|", local.ai_agents)
 
-  images_site_bucket = "bluemarble-images-${var.site_account_id}"
+  images_bucket = "bluemarble-images-${var.site_account_id}"
 }

@@ -4,14 +4,12 @@
 
 #trivy:ignore:AVD-AWS-0090 # Versioning not required; every deploy rewrites the bucket from git
 resource "aws_s3_bucket" "main" {
-  provider      = aws.site
   bucket        = "bluemarble-site-${var.site_account_id}"
   force_destroy = false
 }
 
 resource "aws_s3_bucket_ownership_controls" "main" {
-  provider = aws.site
-  bucket   = aws_s3_bucket.main.id
+  bucket = aws_s3_bucket.main.id
 
   rule {
     object_ownership = "BucketOwnerEnforced"
@@ -19,8 +17,7 @@ resource "aws_s3_bucket_ownership_controls" "main" {
 }
 
 resource "aws_s3_bucket_public_access_block" "main" {
-  provider = aws.site
-  bucket   = aws_s3_bucket.main.id
+  bucket = aws_s3_bucket.main.id
 
   block_public_acls       = true
   block_public_policy     = true
@@ -30,8 +27,7 @@ resource "aws_s3_bucket_public_access_block" "main" {
 
 #trivy:ignore:AVD-AWS-0132 # AWS managed S3 key ok
 resource "aws_s3_bucket_server_side_encryption_configuration" "main" {
-  provider = aws.site
-  bucket   = aws_s3_bucket.main.id
+  bucket = aws_s3_bucket.main.id
 
   rule {
     apply_server_side_encryption_by_default {
@@ -60,9 +56,8 @@ data "aws_iam_policy_document" "site_bucket" {
 }
 
 resource "aws_s3_bucket_policy" "main" {
-  provider = aws.site
-  bucket   = aws_s3_bucket.main.id
-  policy   = data.aws_iam_policy_document.site_bucket.json
+  bucket = aws_s3_bucket.main.id
+  policy = data.aws_iam_policy_document.site_bucket.json
 
   depends_on = [aws_s3_bucket_public_access_block.main]
 }
