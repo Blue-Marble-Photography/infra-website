@@ -1,17 +1,111 @@
-# The old account's hosted zone was retired in phase 5b; Route 53 deletes its apex NS and SOA
-# records with the zone, so they are only dropped from state here.
-removed {
-  from = aws_route53_record.nameservers
+# bluemarble.photography hosted zone (site account, 508360653481). No DNSSEC: dropped on
+# 2026-11-01 when the zone moved accounts.
 
-  lifecycle {
-    destroy = false
+resource "aws_route53_zone" "main" {
+  provider      = aws.site
+  name          = var.domain
+  comment       = "bluemarble.photography (site account)"
+  force_destroy = false
+}
+
+resource "aws_route53_record" "root" {
+  provider = aws.site
+  zone_id  = aws_route53_zone.main.zone_id
+  name     = var.domain
+  type     = "A"
+
+  alias {
+    name                   = module.cdn.main_distribution_domain_name
+    zone_id                = module.cdn.main_distribution_hosted_zone_id
+    evaluate_target_health = false
   }
 }
 
-removed {
-  from = aws_route53_record.soa
+resource "aws_route53_record" "root_ipv6" {
+  provider = aws.site
+  zone_id  = aws_route53_zone.main.zone_id
+  name     = var.domain
+  type     = "AAAA"
 
-  lifecycle {
-    destroy = false
+  alias {
+    name                   = module.cdn.main_distribution_domain_name
+    zone_id                = module.cdn.main_distribution_hosted_zone_id
+    evaluate_target_health = false
   }
+}
+
+resource "aws_route53_record" "images" {
+  provider = aws.site
+  zone_id  = aws_route53_zone.main.zone_id
+  name     = "images.${var.domain}"
+  type     = "A"
+
+  alias {
+    name                   = module.cdn.images_distribution_domain_name
+    zone_id                = module.cdn.images_distribution_hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "images_ipv6" {
+  provider = aws.site
+  zone_id  = aws_route53_zone.main.zone_id
+  name     = "images.${var.domain}"
+  type     = "AAAA"
+
+  alias {
+    name                   = module.cdn.images_distribution_domain_name
+    zone_id                = module.cdn.images_distribution_hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "api" {
+  provider = aws.site
+  zone_id  = aws_route53_zone.main.zone_id
+  name     = "api.${var.domain}"
+  type     = "A"
+
+  alias {
+    name                   = aws_api_gateway_domain_name.api.regional_domain_name
+    zone_id                = aws_api_gateway_domain_name.api.regional_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "mx" {
+  provider = aws.site
+  zone_id  = aws_route53_zone.main.zone_id
+  name     = var.domain
+  type     = "MX"
+  ttl      = "300"
+  records  = var.mx_records
+}
+
+resource "aws_route53_record" "txt" {
+  provider = aws.site
+  zone_id  = aws_route53_zone.main.zone_id
+  name     = var.domain
+  type     = "TXT"
+  ttl      = "300"
+  records  = var.site_verification
+}
+
+resource "aws_route53_record" "dmarc" {
+  provider = aws.site
+  zone_id  = aws_route53_zone.main.zone_id
+  name     = "_dmarc.${var.domain}"
+  type     = "TXT"
+  ttl      = "300"
+  records  = ["v=DMARC1; p=quarantine"]
+}
+
+resource "aws_route53_record" "proton_dkim" {
+  provider = aws.site
+  for_each = var.proton_dkim
+  zone_id  = aws_route53_zone.main.zone_id
+  name     = "${each.key}._domainkey.${var.domain}"
+  type     = "CNAME"
+  ttl      = "300"
+  records  = [each.value]
 }

@@ -1,56 +1,46 @@
-# Phase 5b renames (phase5-cleanup.md); delete once applied.
+# Phase 5b-2 renames (phase5-cleanup.md); delete once applied.
 
 moved {
-  from = aws_route53_zone.site
-  to   = aws_route53_zone.main
+  from = aws_route53_record.site_root
+  to   = aws_route53_record.root
 }
 
 moved {
-  from = aws_route53domains_registered_domain.domain
-  to   = aws_route53domains_registered_domain.main
+  from = aws_route53_record.site_root_ipv6
+  to   = aws_route53_record.root_ipv6
 }
 
 moved {
-  from = aws_route53_record.site_cert_validation
-  to   = aws_route53_record.acm_cert_validation
+  from = aws_route53_record.site_images
+  to   = aws_route53_record.images
 }
 
 moved {
-  from = aws_s3_bucket.site
-  to   = aws_s3_bucket.main
+  from = aws_route53_record.site_images_ipv6
+  to   = aws_route53_record.images_ipv6
 }
 
 moved {
-  from = aws_s3_bucket_ownership_controls.site
-  to   = aws_s3_bucket_ownership_controls.main
+  from = aws_route53_record.site_api
+  to   = aws_route53_record.api
 }
 
 moved {
-  from = aws_s3_bucket_public_access_block.site
-  to   = aws_s3_bucket_public_access_block.main
+  from = aws_route53_record.site_mx
+  to   = aws_route53_record.mx
 }
 
 moved {
-  from = aws_s3_bucket_server_side_encryption_configuration.site
-  to   = aws_s3_bucket_server_side_encryption_configuration.main
+  from = aws_route53_record.site_txt
+  to   = aws_route53_record.txt
 }
 
 moved {
-  from = aws_s3_bucket_policy.site
-  to   = aws_s3_bucket_policy.main
+  from = aws_route53_record.site_dmarc
+  to   = aws_route53_record.dmarc
 }
 
 moved {
-  from = aws_ssm_parameter.site_website_bucket_name
-  to   = aws_ssm_parameter.website_bucket_name
-}
-
-moved {
-  from = aws_ssm_parameter.site_website_distribution
-  to   = aws_ssm_parameter.website_distribution
-}
-
-moved {
-  from = aws_iam_role_policy.site_website_deploy
-  to   = aws_iam_role_policy.website_deploy
+  from = aws_route53_record.site_proton_dkim
+  to   = aws_route53_record.proton_dkim
 }

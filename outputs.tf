@@ -28,7 +28,7 @@ output "site_distribution_id" {
   value       = module.cdn.main_distribution_id
 }
 
-output "site_zone_name_servers" {
-  description = "Name servers of the site-account hosted zone"
+output "zone_name_servers" {
+  description = "Name servers of the bluemarble.photography hosted zone"
   value       = aws_route53_zone.main.name_servers
 }
