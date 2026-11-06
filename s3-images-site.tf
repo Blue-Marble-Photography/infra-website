@@ -1,7 +1,6 @@
-# Images bucket in the site's own account (508360653481): the images distribution's origin and the
-# resize Lambda's bucket (same account; its SAM-managed role grants the access). Viewers only reach it through the images
-# distribution (OAC), so the name doesn't follow the hostname. The old images.bluemarble.photography
-# bucket (s3.tf) is kept as a rollback.
+# Images bucket (508360653481): the images distribution's origin and the resize Lambda's bucket
+# (its SAM-managed role grants the access). Viewers only reach it through the images distribution
+# (OAC), so the name doesn't follow the hostname.
 
 #trivy:ignore:AVD-AWS-0090 # Versioning not required
 resource "aws_s3_bucket" "images_site" {

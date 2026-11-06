@@ -3,11 +3,6 @@ output "bluemarble_infra_role_arn" {
   value       = aws_iam_role.bluemarble_infra.arn
 }
 
-output "images_bucket_name" {
-  description = "S3 bucket holding original and resized images"
-  value       = aws_s3_bucket.images.id
-}
-
 output "images_distribution_id" {
   description = "CloudFront distribution for images"
   value       = module.cdn.images_distribution_id
