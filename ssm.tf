@@ -2,11 +2,11 @@
 resource "aws_ssm_parameter" "website_bucket_name" {
   name  = "/website/bucket-name"
   type  = "String"
-  value = aws_s3_bucket.main.id
+  value = aws_s3_bucket.site.id
 }
 
 resource "aws_ssm_parameter" "website_distribution" {
   name  = "/website/cloudfront-distribution"
   type  = "String"
-  value = module.cdn.main_distribution_id
+  value = module.cdn.site_distribution_id
 }

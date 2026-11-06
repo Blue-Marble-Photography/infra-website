@@ -65,7 +65,13 @@ resource "aws_cloudfront_cache_policy" "images" {
 
 #trivy:ignore:AVD-AWS-0010 # No logging required
 #trivy:ignore:AVD-AWS-0011 # No WAF required
-resource "aws_cloudfront_distribution" "main" {
+resource "aws_cloudfront_distribution" "site" {
+  enabled             = true
+  is_ipv6_enabled     = true
+  aliases             = local.aliases_enabled ? [var.domain] : []
+  default_root_object = "index.html"
+  price_class         = "PriceClass_100"
+
   origin {
     domain_name              = var.site_bucket_regional_domain_name
     origin_access_control_id = aws_cloudfront_origin_access_control.s3.id
@@ -73,11 +79,6 @@ resource "aws_cloudfront_distribution" "main" {
     connection_attempts      = 3
     connection_timeout       = 10
   }
-  enabled             = true
-  is_ipv6_enabled     = true
-  aliases             = local.aliases_enabled ? [var.domain] : []
-  default_root_object = "index.html"
-  price_class         = "PriceClass_100"
 
   custom_error_response {
     error_caching_min_ttl = 300
@@ -89,7 +90,7 @@ resource "aws_cloudfront_distribution" "main" {
   default_cache_behavior {
     cache_policy_id            = data.aws_cloudfront_cache_policy.caching_optimized.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
-    allowed_methods            = ["GET", "HEAD"] # OPTIONS?
+    allowed_methods            = ["GET", "HEAD"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "S3-${var.domain}"
     viewer_protocol_policy     = "redirect-to-https"
@@ -106,6 +107,7 @@ resource "aws_cloudfront_distribution" "main" {
       restriction_type = "none"
     }
   }
+
   viewer_certificate {
     cloudfront_default_certificate = var.certificate_arn == null
     acm_certificate_arn            = var.certificate_arn
@@ -232,6 +234,12 @@ resource "aws_cloudfront_response_headers_policy" "originals_download" {
 #trivy:ignore:AVD-AWS-0010 # No logging required
 #trivy:ignore:AVD-AWS-0011 # No WAF required
 resource "aws_cloudfront_distribution" "images" {
+  enabled             = true
+  is_ipv6_enabled     = true
+  aliases             = local.aliases_enabled ? ["images.${var.domain}"] : []
+  default_root_object = "index.html"
+  price_class         = "PriceClass_100"
+
   # Resized copies live under generated/ (written by the resize Lambda); viewer URLs stay at the root.
   origin {
     domain_name              = var.images_bucket_regional_domain_name
@@ -250,11 +258,6 @@ resource "aws_cloudfront_distribution" "images" {
     connection_attempts      = 3
     connection_timeout       = 10
   }
-  enabled             = true
-  is_ipv6_enabled     = true
-  aliases             = local.aliases_enabled ? ["images.${var.domain}"] : []
-  default_root_object = "index.html"
-  price_class         = "PriceClass_100"
 
   default_cache_behavior {
     cache_policy_id            = aws_cloudfront_cache_policy.images.id
@@ -332,6 +335,7 @@ resource "aws_cloudfront_distribution" "images" {
       restriction_type = "none"
     }
   }
+
   viewer_certificate {
     cloudfront_default_certificate = var.certificate_arn == null
     acm_certificate_arn            = var.certificate_arn
@@ -340,7 +344,7 @@ resource "aws_cloudfront_distribution" "images" {
   }
 }
 
-data "archive_file" "cloudfront_404_redirect_lambda_zip_file" {
+data "archive_file" "cloudfront_404_redirect" {
   type        = "zip"
   output_path = var.lambda_zip_path
 
@@ -355,11 +359,11 @@ resource "aws_lambda_function" "cloudfront_404_redirect" {
   role          = aws_iam_role.lambda_at_edge.arn
   handler       = "main.lambda_handler"
 
-  filename         = data.archive_file.cloudfront_404_redirect_lambda_zip_file.output_path
-  source_code_hash = data.archive_file.cloudfront_404_redirect_lambda_zip_file.output_base64sha256
+  filename         = data.archive_file.cloudfront_404_redirect.output_path
+  source_code_hash = data.archive_file.cloudfront_404_redirect.output_base64sha256
 
   runtime = "python3.14"
-  timeout = "10"
+  timeout = 10
   publish = true
 }
 
@@ -372,4 +376,9 @@ resource "aws_iam_role_policy" "lambda_at_edge_logs" {
   name   = "${var.domain}-logs"
   role   = aws_iam_role.lambda_at_edge.id
   policy = file("${path.module}/templates/iam-logs-policy.json")
+}
+
+moved {
+  from = aws_cloudfront_distribution.main
+  to   = aws_cloudfront_distribution.site
 }

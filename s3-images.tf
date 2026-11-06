@@ -8,7 +8,7 @@ resource "aws_s3_bucket" "images" {
   force_destroy = false
 }
 
-# Objects the resize Lambda writes from 530167849052 belong to this account; ACLs are disabled.
+# Objects the resize Lambda writes belong to the bucket owner; ACLs are disabled.
 resource "aws_s3_bucket_ownership_controls" "images" {
   bucket = aws_s3_bucket.images.id
 
@@ -83,7 +83,7 @@ resource "aws_s3_bucket_policy" "images" {
 resource "aws_s3_object" "images_robots" {
   bucket        = aws_s3_bucket.images.id
   key           = "robots.txt"
-  content       = file("templates/robots-images.txt")
+  content       = file("${path.module}/templates/robots-images.txt")
   content_type  = "text/plain"
   cache_control = "max-age=86400"
 }
@@ -91,7 +91,7 @@ resource "aws_s3_object" "images_robots" {
 resource "aws_s3_object" "images_tdmrep" {
   bucket        = aws_s3_bucket.images.id
   key           = ".well-known/tdmrep.json"
-  content       = file("templates/tdmrep.json")
+  content       = file("${path.module}/templates/tdmrep.json")
   content_type  = "application/json"
   cache_control = "max-age=86400"
 }

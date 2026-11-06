@@ -13,8 +13,8 @@ resource "aws_route53_record" "root" {
   type    = "A"
 
   alias {
-    name                   = module.cdn.main_distribution_domain_name
-    zone_id                = module.cdn.main_distribution_hosted_zone_id
+    name                   = module.cdn.site_distribution_domain_name
+    zone_id                = module.cdn.site_distribution_hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -25,8 +25,8 @@ resource "aws_route53_record" "root_ipv6" {
   type    = "AAAA"
 
   alias {
-    name                   = module.cdn.main_distribution_domain_name
-    zone_id                = module.cdn.main_distribution_hosted_zone_id
+    name                   = module.cdn.site_distribution_domain_name
+    zone_id                = module.cdn.site_distribution_hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -71,7 +71,7 @@ resource "aws_route53_record" "mx" {
   zone_id = aws_route53_zone.main.zone_id
   name    = var.domain
   type    = "MX"
-  ttl     = "300"
+  ttl     = 300
   records = var.mx_records
 }
 
@@ -79,23 +79,24 @@ resource "aws_route53_record" "txt" {
   zone_id = aws_route53_zone.main.zone_id
   name    = var.domain
   type    = "TXT"
-  ttl     = "300"
-  records = var.site_verification
+  ttl     = 300
+  records = var.apex_txt_records
 }
 
 resource "aws_route53_record" "dmarc" {
   zone_id = aws_route53_zone.main.zone_id
   name    = "_dmarc.${var.domain}"
   type    = "TXT"
-  ttl     = "300"
+  ttl     = 300
   records = ["v=DMARC1; p=quarantine"]
 }
 
 resource "aws_route53_record" "proton_dkim" {
   for_each = var.proton_dkim
-  zone_id  = aws_route53_zone.main.zone_id
-  name     = "${each.key}._domainkey.${var.domain}"
-  type     = "CNAME"
-  ttl      = "300"
-  records  = [each.value]
+
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "${each.key}._domainkey.${var.domain}"
+  type    = "CNAME"
+  ttl     = 300
+  records = [each.value]
 }

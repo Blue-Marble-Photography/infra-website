@@ -12,7 +12,7 @@ resource "aws_route53domains_registered_domain" "main" {
   tech_privacy       = true
   billing_privacy    = true
 
-  # The site-account zone (dns-site.tf). DNSSEC was dropped on 2026-11-01 before the move.
+  # The site-account zone (dns.tf). DNSSEC was dropped on 2026-11-01 before the move.
   dynamic "name_server" {
     for_each = aws_route53_zone.main.name_servers
     content {

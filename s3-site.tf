@@ -3,21 +3,21 @@
 # distribution (OAC).
 
 #trivy:ignore:AVD-AWS-0090 # Versioning not required; every deploy rewrites the bucket from git
-resource "aws_s3_bucket" "main" {
+resource "aws_s3_bucket" "site" {
   bucket        = "bluemarble-site-${var.site_account_id}"
   force_destroy = false
 }
 
-resource "aws_s3_bucket_ownership_controls" "main" {
-  bucket = aws_s3_bucket.main.id
+resource "aws_s3_bucket_ownership_controls" "site" {
+  bucket = aws_s3_bucket.site.id
 
   rule {
     object_ownership = "BucketOwnerEnforced"
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "main" {
-  bucket = aws_s3_bucket.main.id
+resource "aws_s3_bucket_public_access_block" "site" {
+  bucket = aws_s3_bucket.site.id
 
   block_public_acls       = true
   block_public_policy     = true
@@ -26,8 +26,8 @@ resource "aws_s3_bucket_public_access_block" "main" {
 }
 
 #trivy:ignore:AVD-AWS-0132 # AWS managed S3 key ok
-resource "aws_s3_bucket_server_side_encryption_configuration" "main" {
-  bucket = aws_s3_bucket.main.id
+resource "aws_s3_bucket_server_side_encryption_configuration" "site" {
+  bucket = aws_s3_bucket.site.id
 
   rule {
     apply_server_side_encryption_by_default {
@@ -36,11 +36,11 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "main" {
   }
 }
 
-data "aws_iam_policy_document" "site_bucket" {
+data "aws_iam_policy_document" "site" {
   statement {
     sid       = "AllowCloudFrontOAC"
     actions   = ["s3:GetObject", "s3:ListBucket"]
-    resources = [aws_s3_bucket.main.arn, "${aws_s3_bucket.main.arn}/*"]
+    resources = [aws_s3_bucket.site.arn, "${aws_s3_bucket.site.arn}/*"]
 
     principals {
       type        = "Service"
@@ -50,14 +50,39 @@ data "aws_iam_policy_document" "site_bucket" {
     condition {
       test     = "StringEquals"
       variable = "AWS:SourceArn"
-      values   = [module.cdn.main_distribution_arn]
+      values   = [module.cdn.site_distribution_arn]
     }
   }
 }
 
-resource "aws_s3_bucket_policy" "main" {
-  bucket = aws_s3_bucket.main.id
-  policy = data.aws_iam_policy_document.site_bucket.json
+resource "aws_s3_bucket_policy" "site" {
+  bucket = aws_s3_bucket.site.id
+  policy = data.aws_iam_policy_document.site.json
 
-  depends_on = [aws_s3_bucket_public_access_block.main]
+  depends_on = [aws_s3_bucket_public_access_block.site]
+}
+
+moved {
+  from = aws_s3_bucket.main
+  to   = aws_s3_bucket.site
+}
+
+moved {
+  from = aws_s3_bucket_ownership_controls.main
+  to   = aws_s3_bucket_ownership_controls.site
+}
+
+moved {
+  from = aws_s3_bucket_public_access_block.main
+  to   = aws_s3_bucket_public_access_block.site
+}
+
+moved {
+  from = aws_s3_bucket_server_side_encryption_configuration.main
+  to   = aws_s3_bucket_server_side_encryption_configuration.site
+}
+
+moved {
+  from = aws_s3_bucket_policy.main
+  to   = aws_s3_bucket_policy.site
 }

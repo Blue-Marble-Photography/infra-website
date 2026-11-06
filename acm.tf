@@ -1,8 +1,8 @@
-# Certificate for bluemarble.photography, images.* and api.*, validated in the site zone (dns-site.tf).
+# Certificate for bluemarble.photography, images.* and api.*, validated in the site zone (dns.tf).
 resource "aws_acm_certificate" "main" {
   domain_name               = var.domain
   validation_method         = "DNS"
-  subject_alternative_names = var.domain_aliases
+  subject_alternative_names = local.domain_aliases
 
   options {
     certificate_transparency_logging_preference = "ENABLED"
@@ -21,6 +21,7 @@ resource "aws_route53_record" "acm_cert_validation" {
       type   = dvo.resource_record_type
     }
   }
+
   zone_id         = aws_route53_zone.main.zone_id
   allow_overwrite = true
   name            = each.value.name
